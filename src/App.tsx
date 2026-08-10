@@ -10,6 +10,7 @@ import { Departures } from "./screens/Departures";
 import { ListPage } from "./screens/ListPage";
 import { Lists } from "./screens/Lists";
 import { Passport } from "./screens/Passport";
+import { Profile } from "./screens/Profile";
 
 export function App() {
   const [logging, setLogging] = useState(false);
@@ -22,7 +23,8 @@ export function App() {
         <ProfileHeader />
 
         <Routes>
-          <Route path="/" element={<Activity />} />
+          <Route path="/" element={<Profile />} />
+          <Route path="/activity" element={<Activity />} />
           <Route path="/cities" element={<Cities />} />
           <Route path="/departures" element={<Departures />} />
           <Route path="/passport" element={<Passport />} />

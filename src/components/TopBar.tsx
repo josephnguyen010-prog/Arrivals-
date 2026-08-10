@@ -8,7 +8,8 @@ interface TopBarProps {
 }
 
 const LINKS = [
-  { to: "/", label: "Activity", end: true },
+  { to: "/", label: "Profile", end: true },
+  { to: "/activity", label: "Activity", end: false },
   { to: "/cities", label: "Cities", end: false },
   { to: "/departures", label: "Departures", end: false },
   { to: "/passport", label: "MyPassport", end: false },

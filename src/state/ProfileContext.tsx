@@ -7,7 +7,11 @@ export interface Profile {
   bio: string;
   /** A downscaled JPEG data URL, or empty to fall back to initials. */
   avatar: string;
+  /** Up to four, in the order you want them shown. */
+  favourites: string[];
 }
+
+export const MAX_FAVOURITES = 4;
 
 const KEY = "arrivals.profile.v1";
 
@@ -16,6 +20,7 @@ const DEFAULT_PROFILE: Profile = {
   handle: "joseph",
   bio: "",
   avatar: "",
+  favourites: ["hcmc", "tokyo", "ist", "lisbon"],
 };
 
 function load(): Profile {
@@ -28,6 +33,10 @@ function load(): Profile {
       handle: typeof parsed.handle === "string" ? parsed.handle : DEFAULT_PROFILE.handle,
       bio: typeof parsed.bio === "string" ? parsed.bio : "",
       avatar: typeof parsed.avatar === "string" ? parsed.avatar : "",
+      // Profiles saved before favourites existed have none.
+      favourites: Array.isArray(parsed.favourites)
+        ? parsed.favourites.slice(0, MAX_FAVOURITES)
+        : DEFAULT_PROFILE.favourites,
     };
   } catch {
     return DEFAULT_PROFILE;
@@ -37,6 +46,7 @@ function load(): Profile {
 interface ProfileContextValue {
   profile: Profile;
   save: (next: Profile) => void;
+  setFavourites: (ids: string[]) => void;
   /** First letters of the name, for when there's no avatar. */
   initials: string;
 }
@@ -63,9 +73,13 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
+  const setFavourites = useCallback((ids: string[]) => {
+    setProfile((current) => ({ ...current, favourites: ids.slice(0, MAX_FAVOURITES) }));
+  }, []);
+
   const value = useMemo<ProfileContextValue>(
-    () => ({ profile, save, initials: initialsOf(profile.name) }),
-    [profile, save],
+    () => ({ profile, save, setFavourites, initials: initialsOf(profile.name) }),
+    [profile, save, setFavourites],
   );
 
   return <ProfileContext.Provider value={value}>{children}</ProfileContext.Provider>;

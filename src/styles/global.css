@@ -1073,6 +1073,151 @@ select option {
 
 /* ------------------------------------------------------- departures --- */
 
+/* ----------------------------------------------------- profile page --- */
+
+.profile-page {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 260px;
+  gap: 44px;
+  align-items: start;
+}
+
+.profile-main {
+  min-width: 0;
+}
+
+/* Always four across: a top four reads as a row, not a reflowing grid. */
+.favourites {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.fav-empty {
+  aspect-ratio: 3 / 2;
+  border: 1px dashed var(--rule);
+  border-radius: 2px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  color: var(--muted);
+}
+
+.fav-empty:hover {
+  border-color: var(--accent);
+  color: var(--ink);
+}
+
+.fav-empty span {
+  font-size: 22px;
+  line-height: 1;
+}
+
+.fav-empty small {
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.recent-item {
+  min-width: 0;
+}
+
+.recent-when {
+  display: block;
+  margin-top: 5px;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.recent-when em {
+  font-style: normal;
+  color: var(--air-blue);
+}
+
+.profile-side {
+  min-width: 0;
+}
+
+.side-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  padding-bottom: 8px;
+  margin-bottom: 12px;
+  border-bottom: 1px solid var(--rule);
+}
+
+.side-head a:hover {
+  color: var(--accent);
+}
+
+.side-count {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.side-strip {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 3px;
+}
+
+.side-strip img {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  border-radius: 2px;
+}
+
+.side-strip:hover img {
+  opacity: 0.85;
+}
+
+.side-empty {
+  font-size: 13px;
+}
+
+.side-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.side-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 7px 0;
+  border-bottom: 1px solid var(--rule);
+  font-size: 13.5px;
+}
+
+.side-list a:hover {
+  color: var(--accent);
+}
+
+@media (max-width: 900px) {
+  .profile-page {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+
+  .favourites {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
 /* ------------------------------------------------------ city search --- */
 
 .search-row {

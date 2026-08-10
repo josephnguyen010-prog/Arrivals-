@@ -88,7 +88,8 @@ export function EditProfile({ onClose }: { onClose: () => void }) {
           className="log-btn"
           disabled={busy}
           onClick={() => {
-            save({ name, handle, bio, avatar });
+            // Favourites are edited on the profile page, not here.
+            save({ ...profile, name, handle, bio, avatar });
             onClose();
           }}
         >

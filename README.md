@@ -54,8 +54,16 @@ visit, and the MyPassport screen shows them in order, with repeat trips marked `
 restaurant apps have to fight for. A few thousand cities from GeoNames or Wikidata and the
 catalogue problem is solved.
 
-## Two screens, split by whether you've been
+## Profile
 
+The landing screen: your four favourite cities, recent activity, and previews of Departures and
+MyPassport down the side. Favourites are chosen and ordered by hand rather than taken from the top
+of the ranking — the city you'd tell someone about isn't always the one you scored highest, and
+that gap is the interesting part.
+
+No bio block and no promo panel, which is what the reference had and this doesn't need.
+
+## Two screens, split by whether you've been
 **Cities** is only where you've been. A grid two-thirds full of grey `not been` cards was noise
 rather than a catalogue, so unvisited cities are not there at all.
 
@@ -105,7 +113,7 @@ src/
   state/                LogContext, ListsContext, SpotsContext and ProfileContext
   data/                 city catalogue, photo credits, seed data
   components/           Stars, CityCard, Stamp, ArrivalStamp, the flows
-  screens/              Activity, Cities, Departures, Passport, Lists, ListPage, CityPage
+  screens/              Profile, Activity, Cities, Departures, Passport, Lists, ListPage, CityPage
   styles/tokens.css     the palette, both themes
 ```
 
