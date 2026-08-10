@@ -1,6 +1,9 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { BrowserRouter } from "react-router-dom";
+// Hash routing: this gets served from a GitHub Pages sub-path, where a real
+// path like /postmark/cities would 404 on refresh because Pages has no SPA
+// fallback. The hash never reaches the server.
+import { HashRouter } from "react-router-dom";
 import { App } from "./App";
 import { ListsProvider } from "./state/ListsContext";
 import { LogProvider } from "./state/LogContext";
@@ -11,12 +14,12 @@ if (!container) throw new Error("Missing #root");
 
 createRoot(container).render(
   <StrictMode>
-    <BrowserRouter>
+    <HashRouter>
       <LogProvider>
         <ListsProvider>
           <App />
         </ListsProvider>
       </LogProvider>
-    </BrowserRouter>
+    </HashRouter>
   </StrictMode>,
 );

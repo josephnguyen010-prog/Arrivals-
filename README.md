@@ -17,6 +17,17 @@ npm test         # ranking logic
 npm run build    # typecheck + production build
 ```
 
+## Where it's deployed
+
+A copy of the build is served from the portfolio at `/postmark/`. Two things make that work, and
+both matter if you move it anywhere else:
+
+- `base: "./"` in `vite.config.ts`, so asset paths are relative and survive any sub-path.
+- `HashRouter` rather than `BrowserRouter`. GitHub Pages has no SPA fallback, so a real path like
+  `/postmark/cities` would 404 on refresh. The hash never reaches the server.
+
+To update the copy in the portfolio: `npm run build`, then replace `public/postmark/` there.
+
 ## The idea
 
 Three decisions carry the design.
