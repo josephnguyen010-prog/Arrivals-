@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { PhotoCreditLine } from "../components/PhotoCreditLine";
+import { RateFlow } from "../components/RateFlow";
+import { RateInline } from "../components/RateInline";
 import { SpotForm } from "../components/SpotForm";
 import { SpotList } from "../components/SpotList";
 import { Stamp } from "../components/Stamp";
@@ -14,6 +16,7 @@ export function CityPage() {
   const { id = "" } = useParams();
   const { log, toggleWishlist } = useLog();
   const [addingSpot, setAddingSpot] = useState(false);
+  const [pending, setPending] = useState<number | null>(null);
   const city = cityById(id);
 
   if (!city) {
@@ -52,15 +55,20 @@ export function CityPage() {
           <div className="city-meta">
             {rating === null ? (
               <div className="pstat left">
-                <b>—</b>
-                <span>Not been</span>
+                {/* Rateable straight from here, so a city can be scored without
+                    logging a trip first. */}
+                <RateInline
+                  value={null}
+                  onPick={setPending}
+                  label={`Rate ${city.name}`}
+                />
+                <span>Tap to rate</span>
               </div>
             ) : (
               <>
                 <div className="pstat left">
-                  {/* Not inside <b> — a bold star row is a synthesised outline. */}
-                  <Stars value={rating} size={22} />
-                  <span>Your rating</span>
+                  <RateInline value={rating} onPick={setPending} label={`Change your rating of ${city.name}`} />
+                  <span>Your rating · tap to change</span>
                 </div>
                 <div className="pstat left">
                   <b>#{rank.pos}</b>
@@ -101,6 +109,10 @@ export function CityPage() {
       <SpotList city={city.id} />
 
       {addingSpot && <SpotForm city={city} onClose={() => setAddingSpot(false)} />}
+
+      {pending !== null && (
+        <RateFlow city={city} rating={pending} onDone={() => setPending(null)} />
+      )}
 
       <div className="two-col" style={{ marginTop: "36px" }}>
         <div>

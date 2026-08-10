@@ -31,6 +31,18 @@ function credit(author: string, licence: string, file: string): PhotoCredit {
  */
 export const PHOTO_CREDITS: Record<CityId, PhotoCredit> = {
   amsterdam: credit("Jorge Láscar", "CC BY 2.0", "Swans in a canal, Oudezijds Voorburgwal, with Bridge 105 (5822070926).jpg"),
+  austin: credit("rutlo", "CC BY 2.0", "Austin Skyline From Mopac.JPG"),
+  boston: credit("Nelson48", "Public domain", "Boston Financial District skyline.jpg"),
+  chicago: credit("Eric Pancer", "CC BY 2.0", "St. Charles Air Line Bridge and ex-B&O bridge with Chicago skyline.jpg"),
+  dc: credit("Carol M. Highsmith", "Public domain", "July 4th fireworks, Washington, D.C. (LOC).jpg"),
+  denver: credit("Quintin Soloviev", "CC BY 4.0", "Denver, Colorado skyline (cropped).jpg"),
+  honolulu: credit("Cumulus Clouds", "CC BY 2.5", "Waikiki Beach from Diamond Head.jpg"),
+  la: credit("Serouj", "Public domain", "Downtown Los Angeles California.jpg"),
+  miami: credit("Averette", "CC BY 3.0", "Biscayne Bay south.jpg"),
+  neworleans: credit("George Bannister", "CC BY 2.0", "New Orleans from the Air September 2019 - Central Business District Skyline (cropped).jpg"),
+  philly: credit("Goldcup", "CC0", "Columbia Bridge Turn 2014.jpg"),
+  seattle: credit("Seattle Municipal Archives", "CC BY 2.0", "Space Needle and skyline from Kerry Park, 2000.jpg"),
+  vegas: credit("Notdjey", "CC BY 2.0", "Las Vegas by night 2019 - 46671323131.jpg"),
   bangkok: credit("Swaminathan", "CC BY 2.0", "Statetower.jpg"),
   barcelona: credit("M McBey", "CC BY 2.0", "Evening light over Barcelona.jpg"),
   berlin: credit("Bleppo", "Public domain", "Berlin Skyline voll.jpg"),

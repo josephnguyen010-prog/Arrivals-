@@ -5,8 +5,8 @@ import { useLog } from "../state/LogContext";
 import type { City, LogState, Placement } from "../types";
 import { CityCard } from "./CityCard";
 import { Modal } from "./Modal";
+import { RateInline } from "./RateInline";
 import { StarPicker } from "./StarPicker";
-import { Stars } from "./Stars";
 
 interface EditCityProps {
   city: City;
@@ -111,11 +111,18 @@ export function EditCity({ city, onClose }: EditCityProps) {
       <div className="edit-row">
         <div>
           <b>Rating</b>
-          <span>{rating === null ? "Not rated" : <Stars value={rating} size={15} />}</span>
+          {/* Editable in place — the same control as the city page. */}
+          <RateInline
+            value={rating}
+            size={18}
+            onPick={(value: number) => {
+              const { state, placement } = begin(city.id, value);
+              advance(state, placement);
+            }}
+            label={`Rate ${city.name}`}
+          />
         </div>
-        <button className="ghost" onClick={() => setStep({ name: "rate" })}>
-          {rating === null ? "Rate it" : "Change"}
-        </button>
+        <span className="edit-hint">Tap the stars</span>
       </div>
 
       <p className="field-label">Visits</p>

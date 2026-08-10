@@ -1,4 +1,5 @@
 import type { CityId, Spot } from "../types";
+import { SEED_SPOTS } from "../data/spots";
 
 const KEY = "arrivals.spots.v1";
 
@@ -14,7 +15,8 @@ const BUDGET_BYTES = 3_500_000;
 export function loadSpots(): Spot[] {
   try {
     const raw = localStorage.getItem(KEY);
-    if (!raw) return [];
+    // Same arrangement as the log: seeded until you write your own.
+    if (!raw) return SEED_SPOTS;
     const parsed = JSON.parse(raw);
     if (!Array.isArray(parsed)) return [];
     return parsed.filter(

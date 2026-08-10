@@ -39,7 +39,8 @@ To update the copy in the portfolio: `npm run build`, then replace `public/arriv
 
 Three decisions carry the design.
 
-**A rating and a ranking are different things.** You give a city a star rating outright. But when
+**A rating and a ranking are different things.** You give a city a star rating outright — tap the
+stars on any city page, or the pencil on a card in Cities. But when
 you land on a rating you've already given something else, the app asks which of the two you
 preferred, and inserts the new city by binary search. Placing into a rating that holds *n* cities
 costs `ceil(log2(n + 1))` questions — three for eight cities, four for sixteen — so it stays a
@@ -74,6 +75,10 @@ Two things worth knowing about how they're stored:
   returns null for anything that doesn't resolve to http(s) — `javascript:` above all — so the save
   button stays disabled and nothing unsafe is ever put in an `href`. Links render with
   `rel="noreferrer noopener"`. It's tested.
+
+The section ships with sample spots for a dozen cities. The places are real and well known; the
+opinions are written for the prototype and are nobody's actual recommendations. Links use Google's
+documented Maps search URL, which resolves for any query — no invented place ids to rot.
 
 `Skip it` was my addition to the three categories. A negative recommendation is genuinely useful
 and rare in travel apps, but it changes the tone — drop it from `SPOT_CATEGORIES` if you'd rather
@@ -130,14 +135,14 @@ Not built yet:
   `lib/storage.ts` for a Supabase table is the whole migration for the log itself; the social half
   is a real build.
 - **A real date picker.** Step 2 offers recent months and invents a day of the month.
-- **More than 32 cities.** The catalogue is still a hand-written array; the real one is GeoNames.
+- **More than 44 cities.** The catalogue is still a hand-written array; the real one is GeoNames.
 - **Sharing a list.** Lists exist and are editable, but only in your own browser. Making one
   shareable is the point of them and needs the backend.
 - **Your own photo per visit.** Spots take photos now; visits still don't.
 
 ## Photos
 
-All 32 are CC0, public domain or attribution-only, and the credit renders on each city's page because CC BY
+All 44 are CC0, public domain or attribution-only, and the credit renders on each city's page because CC BY
 requires it to reach whoever is looking at the photo. Share-alike is deliberately excluded: it
 obliges derivative works to carry the same licence, which is a problem once photos sit inside a
 product. [CREDITS.md](CREDITS.md) has the full table and the rule for adding a city.
