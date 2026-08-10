@@ -91,7 +91,7 @@ export function Departures() {
               to={`/city/${city.id}`}
               rating={ratingOf(log, city.id)}
               plain
-              wished
+              wishMode="remove"
               onToggleWish={() => toggleWishlist(city.id)}
             />
           ))}

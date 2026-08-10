@@ -13,6 +13,11 @@ interface CityCardProps {
   /** Shows the Departures toggle in the corner. */
   wished?: boolean;
   onToggleWish?: () => void;
+  /**
+   * On the Departures board itself, every card is on the board, so a tick
+   * states what you can already see. There the control is a plain remove.
+   */
+  wishMode?: "toggle" | "remove";
   onEdit?: () => void;
   /**
    * Drops the greyed-out treatment and the "Not been" label. Used on the
@@ -30,7 +35,18 @@ interface CityCardProps {
  * it drags the button's label into the link's accessible name — every card
  * ended up announcing itself as "Add Tokyo to Departures".
  */
-export function CityCard({ city, rating, visits = 0, to, wished, onToggleWish, onEdit, plain }: CityCardProps) {
+export function CityCard({
+  city,
+  rating,
+  visits = 0,
+  to,
+  wished,
+  onToggleWish,
+  wishMode = "toggle",
+  onEdit,
+  plain,
+}: CityCardProps) {
+  const removing = wishMode === "remove";
   const wrap = (children: ReactNode, className?: string) =>
     to ? (
       <Link to={to} className={className}>
@@ -52,16 +68,27 @@ export function CityCard({ city, rating, visits = 0, to, wished, onToggleWish, o
           </button>
         )}
 
-        {onToggleWish && (
-          <button
-            className={wished ? "pin on" : "pin"}
-            aria-pressed={wished}
-            aria-label={wished ? `Remove ${city.name} from Departures` : `Add ${city.name} to Departures`}
-            onClick={onToggleWish}
-          >
-            {wished ? "✓" : "+"}
-          </button>
-        )}
+        {onToggleWish &&
+          (removing ? (
+            <button
+              className="pin remove"
+              aria-label={`Remove ${city.name} from Departures`}
+              title="Remove from Departures"
+              onClick={onToggleWish}
+            >
+              ✕
+            </button>
+          ) : (
+            <button
+              className={wished ? "pin on" : "pin"}
+              aria-pressed={wished}
+              aria-label={wished ? `Remove ${city.name} from Departures` : `Add ${city.name} to Departures`}
+              title={wished ? "On your Departures board" : "Add to Departures"}
+              onClick={onToggleWish}
+            >
+              {wished ? "✓" : "+"}
+            </button>
+          ))}
       </div>
 
       {wrap(

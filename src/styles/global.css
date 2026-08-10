@@ -1082,6 +1082,18 @@ select option {
   background: var(--accent);
 }
 
+/* On the board, removal is the only action, so it stays reachable rather than
+   waiting for a hover the way a state badge can. */
+.pin.remove {
+  opacity: 1;
+  font-size: 12px;
+  background: rgba(18, 28, 36, 0.55);
+}
+
+.pin.remove:hover {
+  background: var(--accent);
+}
+
 /* ------------------------------------------------------- departures --- */
 
 /* ----------------------------------------------------- profile page --- */
