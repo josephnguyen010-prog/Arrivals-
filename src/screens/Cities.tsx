@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import { CityCard } from "../components/CityCard";
 import { EditCity } from "../components/EditCity";
 import { CITIES, REGIONS } from "../data/cities";
@@ -30,11 +31,14 @@ export function Cities() {
     const order = orderedIds(log);
 
     const filtered = CITIES.filter((city) => {
-      if (region !== "all" && city.region !== region) return false;
-
+      // Only places you've been. Everywhere else lives on Departures — a grid
+      // of grey "not been" cards was noise, not a catalogue.
       const value = ratingOf(log, city.id);
+      const been = value !== null || visitsFor(log, city.id).length > 0;
+      if (!been) return false;
+
+      if (region !== "all" && city.region !== region) return false;
       if (rating === "all") return true;
-      if (rating === "unrated") return value === null;
       if (rating.startsWith("=")) return value === parseFloat(rating.slice(1));
       return value !== null && value >= parseFloat(rating);
     });
@@ -68,7 +72,6 @@ export function Cities() {
           onChange={(event) => setRating(event.target.value)}
         >
           <option value="all">Rating</option>
-          <option value="unrated">Not been</option>
           <optgroup label="At least">
             {["4.5", "4", "3.5", "3", "2"].map((step) => (
               <option key={step} value={step}>
@@ -126,7 +129,16 @@ export function Cities() {
       </div>
 
       {rows.length === 0 ? (
-        <p className="empty">Nothing matches those filters.</p>
+        <p className="empty">
+          {orderedIds(log).length === 0 ? (
+            <>
+              Nowhere yet. <Link to="/departures">Departures</Link> has everywhere you haven't been —
+              or log a visit to start.
+            </>
+          ) : (
+            "Nothing matches those filters."
+          )}
+        </p>
       ) : (
         <div className={tight ? "grid tight" : "grid"}>
           {rows.map((city) => (

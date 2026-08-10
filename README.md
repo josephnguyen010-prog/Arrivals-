@@ -54,11 +54,17 @@ visit, and the MyPassport screen shows them in order, with repeat trips marked `
 restaurant apps have to fight for. A few thousand cities from GeoNames or Wikidata and the
 catalogue problem is solved.
 
-## Departures
+## Two screens, split by whether you've been
 
-The watchlist, named for the other half of the board. Add a city from the search on the Departures
-screen, or from the `+` in the corner of any card in Cities. Logging a visit takes a city off by
-itself — the board is what's still ahead of you, and if you want to go back you can put it on again.
+**Cities** is only where you've been. A grid two-thirds full of grey `not been` cards was noise
+rather than a catalogue, so unvisited cities are not there at all.
+
+**Departures** holds everything else: the board of places you mean to reach, and below it
+*Everywhere else*, the rest of the catalogue with a `+` on each card. That second grid was cut
+earlier for duplicating Cities; once Cities stopped listing unvisited places, it stopped being a
+duplicate and became the only place the full catalogue lives.
+
+Logging a visit moves a city across on its own — off the board, into Cities.
 
 ## Spots
 

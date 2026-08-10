@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { CityCard } from "../components/CityCard";
 import { Stars } from "../components/Stars";
 import { CITIES, requireCity } from "../data/cities";
-import { ratingOf } from "../lib/ranking";
+import { ratingOf, visitsFor } from "../lib/ranking";
 import { inlineCompletion, searchCities } from "../lib/search";
 import { useLog } from "../state/LogContext";
 
@@ -23,6 +23,17 @@ export function Departures() {
   }, [term, log.wishlist]);
 
   const completion = inlineCompletion(matches, term);
+
+  const elsewhere = useMemo(
+    () =>
+      CITIES.filter(
+        (city) =>
+          ratingOf(log, city.id) === null &&
+          visitsFor(log, city.id).length === 0 &&
+          !log.wishlist.includes(city.id),
+      ),
+    [log],
+  );
 
   return (
     <section className="screen">
@@ -83,9 +94,7 @@ export function Departures() {
       </div>
 
       {log.wishlist.length === 0 ? (
-        <p className="empty">
-          Nothing on the board yet. Search above, or use the <b>+</b> on any city in Cities.
-        </p>
+        <p className="empty">Nothing on the board yet. Search above, or add one from below.</p>
       ) : (
         <div className="grid">
           {log.wishlist.map((id) => (
@@ -99,6 +108,29 @@ export function Departures() {
             />
           ))}
         </div>
+      )}
+
+      {/* Cities only lists where you've been, so this is where the rest of the
+          catalogue lives — and it is no longer a duplicate of that screen. */}
+      {elsewhere.length > 0 && (
+        <>
+          <h2 style={{ marginTop: "40px" }}>Everywhere else</h2>
+          <p className="lede">
+            The {elsewhere.length} cities you haven't been to and haven't booked. The <b>+</b> puts one
+            on the board.
+          </p>
+          <div className="grid tight">
+            {elsewhere.map((city) => (
+              <CityCard
+                key={city.id}
+                city={city}
+                to={`/city/${city.id}`}
+                rating={null}
+                onToggleWish={() => toggleWishlist(city.id)}
+              />
+            ))}
+          </div>
+        </>
       )}
     </section>
   );
