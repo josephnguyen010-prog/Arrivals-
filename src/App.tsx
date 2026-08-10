@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Route, Routes } from "react-router-dom";
 import { LogVisitFlow } from "./components/LogVisitFlow";
+import { NavTabs } from "./components/NavTabs";
 import { ProfileHeader } from "./components/ProfileHeader";
 import { TopBar } from "./components/TopBar";
 import { Activity } from "./screens/Activity";
@@ -21,6 +22,7 @@ export function App() {
 
       <div className="wrap">
         <ProfileHeader />
+        <NavTabs />
 
         <Routes>
           <Route path="/" element={<Profile />} />

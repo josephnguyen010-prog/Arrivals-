@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { NavLink } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useTheme } from "../lib/useTheme";
 import { CitySearch } from "./CitySearch";
 
@@ -7,15 +7,7 @@ interface TopBarProps {
   onLogVisit: () => void;
 }
 
-const LINKS = [
-  { to: "/", label: "Profile", end: true },
-  { to: "/activity", label: "Activity", end: false },
-  { to: "/cities", label: "Cities", end: false },
-  { to: "/departures", label: "Departures", end: false },
-  { to: "/passport", label: "MyPassport", end: false },
-  { to: "/lists", label: "Lists", end: false },
-];
-
+/** The app's own bar: wordmark and the things you can do from anywhere. */
 export function TopBar({ onLogVisit }: TopBarProps) {
   const { theme, toggle } = useTheme();
   const [searching, setSearching] = useState(false);
@@ -25,17 +17,13 @@ export function TopBar({ onLogVisit }: TopBarProps) {
       <div className="airmail" />
       <header className="topbar">
         <div className="topbar-in">
-          <div className="wordmark">
+          <Link className="wordmark" to="/">
             <b>Arrivals</b>
             <span>Cities, logged</span>
-          </div>
-          <nav className="nav">
-            {LINKS.map((link) => (
-              <NavLink key={link.to} to={link.to} end={link.end}>
-                {link.label}
-              </NavLink>
-            ))}
-          </nav>
+          </Link>
+
+          <span className="spacer" />
+
           <button
             className="theme-btn"
             onClick={() => setSearching(true)}
@@ -56,6 +44,7 @@ export function TopBar({ onLogVisit }: TopBarProps) {
           >
             {theme === "dark" ? "☀" : "☾"}
           </button>
+
           <button className="log-btn" onClick={onLogVisit}>
             Log a visit
           </button>
