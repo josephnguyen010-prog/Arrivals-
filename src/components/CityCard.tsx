@@ -14,6 +14,12 @@ interface CityCardProps {
   wished?: boolean;
   onToggleWish?: () => void;
   onEdit?: () => void;
+  /**
+   * Drops the greyed-out treatment and the "Not been" label. Used on the
+   * Departures board, where nowhere has been visited — saying so on every card
+   * is noise, and draining the colour makes a wishlist look joyless.
+   */
+  plain?: boolean;
 }
 
 /**
@@ -24,7 +30,7 @@ interface CityCardProps {
  * it drags the button's label into the link's accessible name — every card
  * ended up announcing itself as "Add Tokyo to Departures".
  */
-export function CityCard({ city, rating, visits = 0, to, wished, onToggleWish, onEdit }: CityCardProps) {
+export function CityCard({ city, rating, visits = 0, to, wished, onToggleWish, onEdit, plain }: CityCardProps) {
   const wrap = (children: ReactNode, className?: string) =>
     to ? (
       <Link to={to} className={className}>
@@ -35,7 +41,7 @@ export function CityCard({ city, rating, visits = 0, to, wished, onToggleWish, o
     );
 
   return (
-    <div className={rating === null ? "card unvisited" : "card"}>
+    <div className={rating === null && !plain ? "card unvisited" : "card"}>
       <div className="shot">
         {wrap(<img src={city.photo} alt={city.name} loading="lazy" />, "shot-link")}
         {visits > 1 && <span className="revisits">↻ {visits}</span>}
@@ -63,7 +69,13 @@ export function CityCard({ city, rating, visits = 0, to, wished, onToggleWish, o
           <div className="cname">{city.name}</div>
           <div className="cmeta">
             <span className="ccountry">{city.cc}</span>
-            {rating === null ? <span className="notbeen">Not been</span> : <Stars value={rating} />}
+            {rating !== null ? (
+              <Stars value={rating} />
+            ) : plain ? (
+              <span className="ccountry">{city.region}</span>
+            ) : (
+              <span className="notbeen">Not been</span>
+            )}
           </div>
         </>,
         "card-text",

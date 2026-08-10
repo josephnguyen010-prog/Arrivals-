@@ -59,10 +59,13 @@ catalogue problem is solved.
 **Cities** is only where you've been. A grid two-thirds full of grey `not been` cards was noise
 rather than a catalogue, so unvisited cities are not there at all.
 
-**Departures** holds everything else: the board of places you mean to reach, and below it
-*Everywhere else*, the rest of the catalogue with a `+` on each card. That second grid was cut
-earlier for duplicating Cities; once Cities stopped listing unvisited places, it stopped being a
-duplicate and became the only place the full catalogue lives.
+**Departures** is only where you're going: a count, a filter row, one grid. Nothing else. An earlier
+version carried a search box and a second grid of the whole catalogue, which made one screen do
+two jobs.
+
+That leaves the catalogue needing a home, so it lives in **search in the top bar** — find any city,
+open it, or add it to the board with the `+` without leaving the results. Same arrangement as a
+watchlist: the list is the list, and finding things is a separate act.
 
 Logging a visit moves a city across on its own — off the board, into Cities.
 

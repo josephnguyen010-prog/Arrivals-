@@ -1073,17 +1073,39 @@ select option {
 
 /* ------------------------------------------------------- departures --- */
 
-.add-departure {
-  margin-bottom: 26px;
-  max-width: 460px;
+/* ------------------------------------------------------ city search --- */
+
+.search-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
-.add-departure .options {
-  margin-top: 8px;
+.search-row .option {
+  flex: 1;
+  min-width: 0;
+}
+
+/* In a list the pin is the only way to add, so it can't wait for a hover. */
+.pin.static {
+  position: static;
+  opacity: 1;
+  flex: none;
+  background: transparent;
+  color: var(--muted);
   border: 1px solid var(--rule);
-  border-radius: 3px;
-  background: var(--surface);
-  max-height: 320px;
+}
+
+.pin.static:hover {
+  background: var(--accent-2);
+  color: #f3f7fa;
+  border-color: var(--accent-2);
+}
+
+.pin.static.on {
+  background: var(--accent-2);
+  color: #f3f7fa;
+  border-color: var(--accent-2);
 }
 
 .wish-btn {

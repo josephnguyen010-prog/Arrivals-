@@ -1,5 +1,7 @@
+import { useState } from "react";
 import { NavLink } from "react-router-dom";
 import { useTheme } from "../lib/useTheme";
+import { CitySearch } from "./CitySearch";
 
 interface TopBarProps {
   onLogVisit: () => void;
@@ -15,6 +17,7 @@ const LINKS = [
 
 export function TopBar({ onLogVisit }: TopBarProps) {
   const { theme, toggle } = useTheme();
+  const [searching, setSearching] = useState(false);
 
   return (
     <>
@@ -34,6 +37,18 @@ export function TopBar({ onLogVisit }: TopBarProps) {
           </nav>
           <button
             className="theme-btn"
+            onClick={() => setSearching(true)}
+            aria-label="Search cities"
+            title="Search cities"
+          >
+            <svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+              <circle cx="7" cy="7" r="5" stroke="currentColor" strokeWidth="1.6" />
+              <path d="M10.8 10.8 L14.5 14.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+            </svg>
+          </button>
+
+          <button
+            className="theme-btn"
             onClick={toggle}
             aria-label={theme === "dark" ? "Switch to light" : "Switch to dark"}
             title={theme === "dark" ? "Switch to light" : "Switch to dark"}
@@ -45,6 +60,8 @@ export function TopBar({ onLogVisit }: TopBarProps) {
           </button>
         </div>
       </header>
+
+      {searching && <CitySearch onClose={() => setSearching(false)} />}
     </>
   );
 }
