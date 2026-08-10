@@ -52,7 +52,10 @@ export interface CityList {
   id: string;
   title: string;
   by: string;
+  /** Total cities in the list; seeded lists show more than they store. */
   count: number;
   blurb: string;
   cities: CityId[];
+  /** Yours to edit, rather than someone else's to read. */
+  mine?: boolean;
 }

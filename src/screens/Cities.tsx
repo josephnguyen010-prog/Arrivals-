@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { CityCard } from "../components/CityCard";
+import { RatingHistogram } from "../components/RatingHistogram";
 import { CITIES, REGIONS } from "../data/cities";
 import { orderedIds, ratingOf, visitsFor } from "../lib/ranking";
 import { useLog } from "../state/LogContext";
@@ -11,6 +12,7 @@ type Sort = "rating" | "recent" | "visits" | "name";
 export function Cities() {
   const { log } = useLog();
   const [rating, setRating] = useState<RatingFilter>("all");
+  const [exact, setExact] = useState<number | null>(null);
   const [region, setRegion] = useState<string>("all");
   const [sort, setSort] = useState<Sort>("rating");
   const [tight, setTight] = useState(false);
@@ -21,6 +23,8 @@ export function Cities() {
     const filtered = CITIES.filter((city) => {
       if (region !== "all" && city.region !== region) return false;
       const value = ratingOf(log, city.id);
+      // A bar in the histogram pins one exact rating and wins over the range.
+      if (exact !== null) return value === exact;
       if (rating === "unrated") return value === null;
       if (rating !== "all") return value !== null && value >= parseFloat(rating);
       return true;
@@ -43,15 +47,18 @@ export function Cities() {
       if (bo === -1) return -1;
       return ao - bo;
     });
-  }, [log, rating, region, sort]);
+  }, [log, rating, exact, region, sort]);
 
   return (
     <section className="screen">
+      <RatingHistogram active={exact} onPick={setExact} />
+
       <div className="filters">
         <label htmlFor="f-rating">Rated</label>
         <select
           id="f-rating"
           value={rating}
+          disabled={exact !== null}
           onChange={(event) => setRating(event.target.value as RatingFilter)}
         >
           <option value="all">Any</option>
@@ -90,6 +97,15 @@ export function Cities() {
           <option value="tight">Small</option>
         </select>
       </div>
+
+      {exact !== null && (
+        <p className="filter-pin">
+          Showing only cities you gave {exact} stars.{" "}
+          <button className="ghost" onClick={() => setExact(null)}>
+            Clear
+          </button>
+        </p>
+      )}
 
       {rows.length === 0 ? (
         <p className="empty">Nothing matches those filters.</p>

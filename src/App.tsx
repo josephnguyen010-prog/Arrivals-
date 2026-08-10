@@ -6,6 +6,7 @@ import { TopBar } from "./components/TopBar";
 import { Activity } from "./screens/Activity";
 import { Cities } from "./screens/Cities";
 import { CityPage } from "./screens/CityPage";
+import { ListPage } from "./screens/ListPage";
 import { Lists } from "./screens/Lists";
 import { Passport } from "./screens/Passport";
 
@@ -24,6 +25,7 @@ export function App() {
           <Route path="/cities" element={<Cities />} />
           <Route path="/passport" element={<Passport />} />
           <Route path="/lists" element={<Lists />} />
+          <Route path="/list/:id" element={<ListPage />} />
           <Route path="/city/:id" element={<CityPage />} />
         </Routes>
 
@@ -34,7 +36,8 @@ export function App() {
           Your log is saved in this browser.
         </p>
         <p className="note">
-          Photographs from Wikimedia Commons — see CREDITS.md. Friends and their notes are invented.
+          Photographs from Wikimedia Commons, all CC0 or attribution-only, credited on each city's
+          page and in CREDITS.md. Friends and their notes are invented.
         </p>
       </div>
 

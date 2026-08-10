@@ -41,10 +41,11 @@ catalogue problem is solved.
 src/
   lib/ranking.ts        the insertion logic, pure and tested
   lib/storage.ts        the only file that knows where the log lives
-  state/LogContext.tsx  the store
-  data/                 city catalogue and seed data
-  components/           Stars, CityCard, Stamp, Postmark, the log flow
-  screens/              Activity, Cities, Passport, Lists, CityPage
+  lib/lists.ts          list persistence
+  state/                LogContext and ListsContext
+  data/                 city catalogue, photo credits, seed data
+  components/           Stars, CityCard, Stamp, Postmark, histogram, the flows
+  screens/              Activity, Cities, Passport, Lists, ListPage, CityPage
   styles/tokens.css     the palette, both themes
 ```
 
@@ -65,23 +66,33 @@ is logged. Everywhere else cities are quiet rectangles, because a grid is for sc
 
 ## State of it
 
-Working: rating, the comparison flow, the ranking, filters and sorts, the passport, per-city pages,
-both themes, and persistence to `localStorage`.
+Working: rating, the comparison flow, the ranking, the histogram, filters and sorts, the passport,
+per-city pages, lists you can create and reorder, both themes, and persistence to `localStorage`.
 
 Not built yet:
 
 - **Accounts and a real social graph.** The feed and the friends' notes are invented. Swapping
   `lib/storage.ts` for a Supabase table is the whole migration for the log itself; the social half
   is a real build.
-- **List detail pages.** Lists are the most shareable object here and currently the least developed —
-  a list card links to its first city.
 - **A real date picker.** Step 2 offers recent months and invents a day of the month.
-- **Photo licensing.** See [CREDITS.md](CREDITS.md); several images are share-alike, which needs
-  resolving before this is public.
+- **Sharing a list.** Lists exist and are editable, but only in your own browser. Making one
+  shareable is the point of them and needs the backend.
+- **Your own photo per visit.** The better long-term answer to the licensing question below.
+
+## Photos
+
+All twelve are CC0 or attribution-only, and the credit renders on each city's page because CC BY
+requires it to reach whoever is looking at the photo. Share-alike is deliberately excluded: it
+obliges derivative works to carry the same licence, which is a problem once photos sit inside a
+product. [CREDITS.md](CREDITS.md) has the full table and the rule for adding a city.
 
 ## The open question
 
-Ratings bunch at the top. Nobody flies somewhere hoping to file it under two stars, so 4 and 4.5
-get long while the bottom stays empty, and all the comparison work concentrates in two bands.
-Beli avoids this because you eat somewhere mediocre every week. Worth watching once there's
-enough real data to see the shape.
+Ratings bunch at the top. Nobody flies somewhere hoping to file it under two stars, so the upper
+bands get long while the bottom stays empty, and the comparison work concentrates in a couple of
+places. Beli avoids this because you eat somewhere mediocre every week.
+
+The histogram on the Cities screen exists to make this visible rather than leave it as a hunch — it
+shows the distribution and what share sits in the busiest band, and clicking a bar filters to it.
+That instruments the problem; it doesn't solve it. If the top two bands do swallow everything once
+there's real data, the fix is probably finer resolution up there rather than more stars overall.

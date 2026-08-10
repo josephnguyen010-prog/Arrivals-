@@ -1,4 +1,5 @@
 import { Link, useParams } from "react-router-dom";
+import { PhotoCreditLine } from "../components/PhotoCreditLine";
 import { Stamp } from "../components/Stamp";
 import { Stars } from "../components/Stars";
 import { cityById } from "../data/cities";
@@ -36,6 +37,7 @@ export function CityPage() {
       <div className="city-top">
         <div>
           <Stamp city={city} rating={rating} date={visits[0]?.when.toUpperCase()} />
+          <PhotoCreditLine city={city.id} />
         </div>
         <div>
           <p className="eyebrow">
