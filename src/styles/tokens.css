@@ -1,0 +1,73 @@
+/* Airmail: the palette is a barber stripe, red and blue together, on kraft or
+   navy ground. Neutrals are biased toward the blue so nothing reads as default
+   grey. Both themes are first-class; the viewer's toggle stamps data-theme on
+   the root and must win over the media query in either direction. */
+
+:root {
+  --display: "Palatino Linotype", "Book Antiqua", Palatino, "URW Palladio L", Georgia, serif;
+  --sans: "Helvetica Neue", Helvetica, Arial, "Segoe UI", sans-serif;
+  --mono: "Courier New", Courier, monospace;
+
+  color-scheme: light;
+  --bg: #e5e1d6;
+  --surface: #f1eee6;
+  --surface-2: #dcd7c9;
+  --ink: #1b2730;
+  --muted: #6b7580;
+  --rule: #c9c3b3;
+  --stamp-bg: #f6f3eb;
+  --postmark: #26313a;
+  --air-red: #c8402f;
+  --air-blue: #2e5f92;
+  --shadow: 0 1px 2px rgba(27, 39, 48, 0.1), 0 6px 18px rgba(27, 39, 48, 0.07);
+
+  --accent: var(--air-red);
+  --accent-2: var(--air-blue);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+    --bg: #121c24;
+    --surface: #1a262f;
+    --surface-2: #223140;
+    --ink: #e8edf1;
+    --muted: #8b9aa5;
+    --rule: #2c3d4b;
+    --stamp-bg: #efebe1;
+    --postmark: #26313a;
+    --air-red: #e1614c;
+    --air-blue: #6fa0ce;
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.34), 0 8px 22px rgba(0, 0, 0, 0.28);
+  }
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #121c24;
+  --surface: #1a262f;
+  --surface-2: #223140;
+  --ink: #e8edf1;
+  --muted: #8b9aa5;
+  --rule: #2c3d4b;
+  --stamp-bg: #efebe1;
+  --postmark: #26313a;
+  --air-red: #e1614c;
+  --air-blue: #6fa0ce;
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.34), 0 8px 22px rgba(0, 0, 0, 0.28);
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+  --bg: #e5e1d6;
+  --surface: #f1eee6;
+  --surface-2: #dcd7c9;
+  --ink: #1b2730;
+  --muted: #6b7580;
+  --rule: #c9c3b3;
+  --stamp-bg: #f6f3eb;
+  --postmark: #26313a;
+  --air-red: #c8402f;
+  --air-blue: #2e5f92;
+  --shadow: 0 1px 2px rgba(27, 39, 48, 0.1), 0 6px 18px rgba(27, 39, 48, 0.07);
+}

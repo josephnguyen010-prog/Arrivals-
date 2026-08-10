@@ -1,0 +1,33 @@
+import type { City } from "../types";
+import { Postmark } from "./Postmark";
+import { Stars } from "./Stars";
+
+interface StampProps {
+  city: City;
+  rating: number | null;
+  /** Printed inside the cancellation mark. */
+  date?: string;
+}
+
+/**
+ * The loud version of a city: perforated edges, the photo as the printed
+ * design, and the rating where a stamp's denomination goes. Kept to the city
+ * page and the moment a visit is logged.
+ */
+export function Stamp({ city, rating, date }: StampProps) {
+  return (
+    <div className="stamp">
+      <div className="pic">
+        <img src={city.photo} alt={city.name} />
+        {rating !== null && <Postmark city={city} date={date ?? "—"} />}
+      </div>
+      <div className="plate">
+        <div>
+          <div className="city">{city.name}</div>
+          <div className="country">{city.country}</div>
+        </div>
+        {rating !== null ? <Stars value={rating} size={14} /> : <span className="unfranked">UNFRANKED</span>}
+      </div>
+    </div>
+  );
+}
