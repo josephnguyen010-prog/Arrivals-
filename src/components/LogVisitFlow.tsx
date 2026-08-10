@@ -3,7 +3,7 @@ import type { KeyboardEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { CITIES, requireCity } from "../data/cities";
 import { nextOpponent, questionsLeft, rankOf, ratingOf, recordAnswer, visitsFor } from "../lib/ranking";
-import { searchCities } from "../lib/search";
+import { inlineCompletion, searchCities } from "../lib/search";
 import { useLog } from "../state/LogContext";
 import type { CityId, LogState, Placement } from "../types";
 import { CityCard } from "./CityCard";
@@ -108,6 +108,7 @@ function PickCity({ onPick, onClose }: { onPick: (id: CityId) => void; onClose: 
   const listRef = useRef<HTMLDivElement>(null);
 
   const matches = useMemo(() => searchCities(CITIES, term), [term]);
+  const completion = useMemo(() => inlineCompletion(matches, term), [matches, term]);
 
   // The best match is highlighted, so typing another letter has to reset it.
   useEffect(() => {
@@ -125,6 +126,16 @@ function PickCity({ onPick, onClose }: { onPick: (id: CityId) => void; onClose: 
     } else if (event.key === "ArrowUp") {
       event.preventDefault();
       setActive((current) => Math.max(0, current - 1));
+    } else if ((event.key === "Tab" || event.key === "ArrowRight") && completion) {
+      // Accept the ghost text. Right-arrow only when the caret is at the end,
+      // so it still moves through the text the rest of the time. Take the
+      // city's own name rather than appending, or "bar" completes to
+      // "barcelona" and keeps the casing you happened to type.
+      const atEnd = event.currentTarget.selectionStart === term.length;
+      if (event.key === "Tab" || atEnd) {
+        event.preventDefault();
+        setTerm(matches[0].city.name);
+      }
     } else if (event.key === "Enter" && matches[active]) {
       event.preventDefault();
       onPick(matches[active].city.id);
@@ -135,19 +146,28 @@ function PickCity({ onPick, onClose }: { onPick: (id: CityId) => void; onClose: 
     <>
       <h2 id="log-title">Step 1 of 3</h2>
       <h3>Where did you go?</h3>
-      <input
-        className="search"
-        placeholder="Start typing a city"
-        autoComplete="off"
-        autoFocus
-        role="combobox"
-        aria-expanded={matches.length > 0}
-        aria-controls="city-matches"
-        aria-autocomplete="list"
-        value={term}
-        onChange={(event) => setTerm(event.target.value)}
-        onKeyDown={onKeyDown}
-      />
+      {/* The ghost sits under a transparent input so the two stay in step;
+          both use the same font and padding, so the text lines up exactly. */}
+      <div className="typeahead">
+        <div className="ghost-text" aria-hidden="true">
+          <span className="typed">{term}</span>
+          <span className="rest">{completion}</span>
+        </div>
+        <input
+          className="search"
+          placeholder="Start typing a city"
+          autoComplete="off"
+          autoFocus
+          role="combobox"
+          aria-expanded={matches.length > 0}
+          aria-controls="city-matches"
+          aria-autocomplete="both"
+          value={term}
+          onChange={(event) => setTerm(event.target.value)}
+          onKeyDown={onKeyDown}
+        />
+      </div>
+      {completion && <p className="ghost-hint">Tab to complete</p>}
       <div className="options" id="city-matches" role="listbox" ref={listRef}>
         {matches.map((match, index) => {
           const { city, at } = match;

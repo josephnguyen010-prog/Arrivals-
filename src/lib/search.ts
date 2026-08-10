@@ -46,3 +46,22 @@ export function searchCities(cities: City[], term: string): Match[] {
     .sort((a, b) => a.rank - b.rank || a.match.city.name.localeCompare(b.match.city.name))
     .map((entry) => entry.match);
 }
+
+/**
+ * The rest of the best match's name, when it starts with what you've typed —
+ * shown as ghost text after the cursor so the completion is visible before you
+ * commit to it. Returns "" when the top hit doesn't extend the term, so nothing
+ * is ever suggested that pressing Tab wouldn't actually give you.
+ */
+export function inlineCompletion(matches: Match[], term: string): string {
+  const typed = term.trim();
+  if (!typed) return "";
+
+  const best = matches[0];
+  if (!best || best.at?.[0] !== 0) return "";
+
+  const name = best.city.name;
+  if (name.length <= typed.length) return "";
+  if (name.slice(0, typed.length).toLowerCase() !== typed.toLowerCase()) return "";
+  return name.slice(typed.length);
+}

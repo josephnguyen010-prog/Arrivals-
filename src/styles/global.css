@@ -290,6 +290,114 @@ h2 {
   text-align: left;
 }
 
+.who-block {
+  min-width: 0;
+}
+
+/* The handle is an inline span everywhere else; here it stacks. */
+.who-block .handle {
+  display: block;
+}
+
+.avatar-preview {
+  width: 62px;
+  height: 62px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex: none;
+}
+
+.bio {
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: 14px;
+  max-width: 48ch;
+}
+
+.edit-profile {
+  display: block;
+  margin-top: 8px;
+  padding: 0;
+}
+
+/* ----------------------------------------------------- edit profile --- */
+
+.avatar-edit {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.avatar-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.handle-field {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.handle-field .at {
+  font-family: var(--mono);
+  color: var(--muted);
+}
+
+.handle-field .search {
+  margin-bottom: 0;
+}
+
+/* -------------------------------------------------------- edit city --- */
+
+.edit-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px;
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+  background: var(--bg);
+  margin-bottom: 6px;
+}
+
+.edit-row b {
+  display: block;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-weight: normal;
+  margin-bottom: 4px;
+}
+
+.edit-visits {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.edit-visits li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--rule);
+}
+
+.edit-visits time {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--muted);
+  letter-spacing: 0.06em;
+}
+
 /* A star row stands in for the number, so it needs the same block spacing. */
 .pstat > .stars {
   display: block;
@@ -411,6 +519,16 @@ select option {
   width: 100%;
   text-align: left;
   padding: 0;
+}
+
+/* The card links in two pieces so the corner buttons can sit outside them. */
+.shot-link,
+.card-text {
+  display: block;
+}
+
+.shot-link {
+  height: 100%;
 }
 
 .shot {
@@ -864,7 +982,109 @@ select option {
   filter: none;
 }
 
+/* -------------------------------------------------------- typeahead --- */
+
+/* The ghost sits behind a transparent-backed input. Both use the same font,
+   size and padding, so the completion lines up with what has been typed. */
+.typeahead {
+  position: relative;
+}
+
+.ghost-text {
+  position: absolute;
+  inset: 0;
+  padding: 10px 12px;
+  font-family: var(--sans);
+  font-size: 15px;
+  line-height: 1.5;
+  white-space: pre;
+  overflow: hidden;
+  pointer-events: none;
+  border: 1px solid transparent;
+}
+
+.ghost-text .typed {
+  visibility: hidden;
+}
+
+.ghost-text .rest {
+  color: var(--muted);
+  opacity: 0.75;
+}
+
+.typeahead .search {
+  position: relative;
+  background: transparent;
+  margin-bottom: 0;
+}
+
+.ghost-hint {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 6px 0 10px;
+}
+
+/* --------------------------------------------------- card overlays --- */
+
+.pin {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  z-index: 3;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 14px;
+  line-height: 1;
+  background: rgba(18, 28, 36, 0.72);
+  color: #eef3f7;
+  opacity: 0;
+  transition: opacity 0.15s ease, background 0.15s ease;
+}
+
+.pin.edit {
+  right: 38px;
+  font-size: 12px;
+}
+
+.card:hover .pin,
+.pin:focus-visible {
+  opacity: 1;
+}
+
+.pin:hover {
+  background: var(--accent-2);
+}
+
+/* A pinned city keeps its badge visible, otherwise the state is invisible. */
+.pin.on {
+  opacity: 1;
+  background: var(--accent-2);
+}
+
+.pin.on:hover {
+  background: var(--accent);
+}
+
 /* ------------------------------------------------------- departures --- */
+
+.add-departure {
+  margin-bottom: 26px;
+  max-width: 460px;
+}
+
+.add-departure .options {
+  margin-top: 8px;
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+  background: var(--surface);
+  max-height: 320px;
+}
 
 .wish-btn {
   margin-top: 18px;

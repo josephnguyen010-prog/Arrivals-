@@ -1,3 +1,5 @@
+import { Link } from "react-router-dom";
+import type { ReactNode } from "react";
 import type { City } from "../types";
 import { Stars } from "./Stars";
 
@@ -6,21 +8,66 @@ interface CityCardProps {
   rating: number | null;
   /** Repeat visits earn a counter; hidden where it would be noise. */
   visits?: number;
+  /** Where the card links to. Omitted inside a comparison, where it is a button. */
+  to?: string;
+  /** Shows the Departures toggle in the corner. */
+  wished?: boolean;
+  onToggleWish?: () => void;
+  onEdit?: () => void;
 }
 
-/** The quiet version, built for scanning a grid of them. */
-export function CityCard({ city, rating, visits = 0 }: CityCardProps) {
+/**
+ * The quiet version, built for scanning a grid of them.
+ *
+ * The card owns its own link rather than being wrapped in one, so the corner
+ * buttons can sit beside it. A button nested inside an anchor is invalid, and
+ * it drags the button's label into the link's accessible name — every card
+ * ended up announcing itself as "Add Tokyo to Departures".
+ */
+export function CityCard({ city, rating, visits = 0, to, wished, onToggleWish, onEdit }: CityCardProps) {
+  const wrap = (children: ReactNode, className?: string) =>
+    to ? (
+      <Link to={to} className={className}>
+        {children}
+      </Link>
+    ) : (
+      <div className={className}>{children}</div>
+    );
+
   return (
     <div className={rating === null ? "card unvisited" : "card"}>
       <div className="shot">
-        <img src={city.photo} alt={city.name} loading="lazy" />
+        {wrap(<img src={city.photo} alt={city.name} loading="lazy" />, "shot-link")}
         {visits > 1 && <span className="revisits">↻ {visits}</span>}
+
+        {onEdit && (
+          <button className="pin edit" aria-label={`Edit ${city.name}`} onClick={onEdit}>
+            ✎
+          </button>
+        )}
+
+        {onToggleWish && (
+          <button
+            className={wished ? "pin on" : "pin"}
+            aria-pressed={wished}
+            aria-label={wished ? `Remove ${city.name} from Departures` : `Add ${city.name} to Departures`}
+            onClick={onToggleWish}
+          >
+            {wished ? "✓" : "+"}
+          </button>
+        )}
       </div>
-      <div className="cname">{city.name}</div>
-      <div className="cmeta">
-        <span className="ccountry">{city.cc}</span>
-        {rating === null ? <span className="notbeen">Not been</span> : <Stars value={rating} />}
-      </div>
+
+      {wrap(
+        <>
+          <div className="cname">{city.name}</div>
+          <div className="cmeta">
+            <span className="ccountry">{city.cc}</span>
+            {rating === null ? <span className="notbeen">Not been</span> : <Stars value={rating} />}
+          </div>
+        </>,
+        "card-text",
+      )}
     </div>
   );
 }

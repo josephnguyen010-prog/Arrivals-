@@ -7,6 +7,7 @@ import { HashRouter } from "react-router-dom";
 import { App } from "./App";
 import { ListsProvider } from "./state/ListsContext";
 import { LogProvider } from "./state/LogContext";
+import { ProfileProvider } from "./state/ProfileContext";
 import { SpotsProvider } from "./state/SpotsContext";
 import "./styles/global.css";
 
@@ -16,13 +17,15 @@ if (!container) throw new Error("Missing #root");
 createRoot(container).render(
   <StrictMode>
     <HashRouter>
-      <LogProvider>
-        <ListsProvider>
-          <SpotsProvider>
-            <App />
-          </SpotsProvider>
-        </ListsProvider>
-      </LogProvider>
+      <ProfileProvider>
+        <LogProvider>
+          <ListsProvider>
+            <SpotsProvider>
+              <App />
+            </SpotsProvider>
+          </ListsProvider>
+        </LogProvider>
+      </ProfileProvider>
     </HashRouter>
   </StrictMode>,
 );

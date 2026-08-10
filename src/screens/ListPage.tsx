@@ -76,13 +76,12 @@ export function ListPage() {
             return (
               <li key={cityId}>
                 <span className="list-pos">{index + 1}</span>
-                <Link to={`/city/${city.id}`}>
-                  <CityCard
-                    city={city}
-                    rating={ratingOf(log, city.id)}
-                    visits={visitsFor(log, city.id).length}
-                  />
-                </Link>
+                <CityCard
+                  city={city}
+                  to={`/city/${city.id}`}
+                  rating={ratingOf(log, city.id)}
+                  visits={visitsFor(log, city.id).length}
+                />
               </li>
             );
           })}

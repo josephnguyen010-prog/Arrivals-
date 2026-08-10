@@ -1,9 +1,10 @@
 import { useMemo, useState } from "react";
-import { Link } from "react-router-dom";
 import { CityCard } from "../components/CityCard";
+import { EditCity } from "../components/EditCity";
 import { CITIES, REGIONS } from "../data/cities";
-import { RATING_STEPS, orderedIds, ratingOf, visitsFor } from "../lib/ranking";
+import { RATING_STEPS, isWished, orderedIds, ratingOf, visitsFor } from "../lib/ranking";
 import { useLog } from "../state/LogContext";
+import type { City } from "../types";
 
 type Sort = "rating" | "recent" | "visits" | "name";
 
@@ -18,7 +19,8 @@ const SORT_LABELS: Record<Sort, string> = {
 };
 
 export function Cities() {
-  const { log } = useLog();
+  const { log, toggleWishlist } = useLog();
+  const [editing, setEditing] = useState<City | null>(null);
   const [rating, setRating] = useState<RatingFilter>("all");
   const [region, setRegion] = useState("all");
   const [sort, setSort] = useState<Sort>("rating");
@@ -128,16 +130,21 @@ export function Cities() {
       ) : (
         <div className={tight ? "grid tight" : "grid"}>
           {rows.map((city) => (
-            <Link key={city.id} to={`/city/${city.id}`}>
-              <CityCard
-                city={city}
-                rating={ratingOf(log, city.id)}
-                visits={visitsFor(log, city.id).length}
-              />
-            </Link>
+            <CityCard
+              key={city.id}
+              city={city}
+              to={`/city/${city.id}`}
+              rating={ratingOf(log, city.id)}
+              visits={visitsFor(log, city.id).length}
+              wished={isWished(log, city.id)}
+              onToggleWish={() => toggleWishlist(city.id)}
+              onEdit={() => setEditing(city)}
+            />
           ))}
         </div>
       )}
+
+      {editing && <EditCity city={editing} onClose={() => setEditing(null)} />}
     </section>
   );
 }

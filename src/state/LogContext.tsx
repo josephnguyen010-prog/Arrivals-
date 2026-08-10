@@ -11,8 +11,13 @@ interface LogContextValue {
   commitVisit: (placement: Placement, visit: Omit<Visit, "id">) => void;
   /** Prepares an insertion; the flow drives it and hands back the result. */
   begin: (cityId: CityId, rating: number) => { state: LogState; placement: Placement };
+  /** Applies a finished placement on its own, for re-rating an existing city. */
+  applyPlacement: (placement: Placement) => void;
   /** Adds or removes a city from Departures. */
   toggleWishlist: (cityId: CityId) => void;
+  /** Forgets a city entirely: its rating and every visit to it. */
+  removeCity: (cityId: CityId) => void;
+  removeVisit: (visitId: string) => void;
   reset: () => void;
 }
 
@@ -40,8 +45,33 @@ export function LogProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
+  const applyPlacement = useCallback((placement: Placement) => {
+    setLog((current) => {
+      const { state: cleaned } = startPlacement(current, placement.cityId, placement.rating);
+      return finishPlacement(cleaned, placement);
+    });
+  }, []);
+
   const toggleWishlist = useCallback((cityId: CityId) => {
     setLog((current) => toggleWish(current, cityId));
+  }, []);
+
+  const removeCity = useCallback((cityId: CityId) => {
+    setLog((current) => {
+      const { state: cleaned } = startPlacement(current, cityId, 0);
+      const rated = { ...cleaned.rated };
+      // startPlacement leaves an empty bucket behind for rating 0; drop it.
+      delete rated["0"];
+      return {
+        ...cleaned,
+        rated,
+        visits: cleaned.visits.filter((visit) => visit.city !== cityId),
+      };
+    });
+  }, []);
+
+  const removeVisit = useCallback((visitId: string) => {
+    setLog((current) => ({ ...current, visits: current.visits.filter((v) => v.id !== visitId) }));
   }, []);
 
   const reset = useCallback(() => {
@@ -50,8 +80,8 @@ export function LogProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const value = useMemo(
-    () => ({ log, commitVisit, begin, toggleWishlist, reset }),
-    [log, commitVisit, begin, toggleWishlist, reset],
+    () => ({ log, commitVisit, begin, applyPlacement, toggleWishlist, removeCity, removeVisit, reset }),
+    [log, commitVisit, begin, applyPlacement, toggleWishlist, removeCity, removeVisit, reset],
   );
 
   return <LogContext.Provider value={value}>{children}</LogContext.Provider>;

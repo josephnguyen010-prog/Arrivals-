@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { searchCities } from "./search";
+import { inlineCompletion, searchCities } from "./search";
 import type { City } from "../types";
 
 const city = (id: string, name: string, country: string): City => ({
@@ -59,5 +59,35 @@ describe("searchCities", () => {
 
   it("returns nothing for a term that matches neither", () => {
     expect(names("zzz")).toEqual([]);
+  });
+});
+
+describe("inlineCompletion", () => {
+  const complete = (term: string) => inlineCompletion(searchCities(CITIES, term), term);
+
+  it("suggests the rest of the best match", () => {
+    expect(complete("tok")).toBe("yo");
+    expect(complete("por")).toBe("to");
+  });
+
+  it("keeps the casing of the real name, not what was typed", () => {
+    expect(complete("ho chi")).toBe(" Minh City");
+  });
+
+  it("suggests nothing on an empty term", () => {
+    expect(complete("")).toBe("");
+  });
+
+  it("suggests nothing once the name is fully typed", () => {
+    expect(complete("Tokyo")).toBe("");
+  });
+
+  it("suggests nothing when the best match doesn't start with the term", () => {
+    // Only the country matches, so there is nothing to complete.
+    expect(complete("japan")).toBe("");
+  });
+
+  it("suggests nothing when nothing matches", () => {
+    expect(complete("zzz")).toBe("");
   });
 });

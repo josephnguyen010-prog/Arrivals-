@@ -1,59 +1,104 @@
-import { Link } from "react-router-dom";
+import { useMemo, useState } from "react";
 import { CityCard } from "../components/CityCard";
+import { Stars } from "../components/Stars";
 import { CITIES, requireCity } from "../data/cities";
 import { ratingOf } from "../lib/ranking";
+import { inlineCompletion, searchCities } from "../lib/search";
 import { useLog } from "../state/LogContext";
 
+/**
+ * One board and one way to add to it. The earlier version showed a second grid
+ * of every city you hadn't been to, which read as a duplicate of the Cities
+ * screen; a search box does the same job without the noise.
+ */
 export function Departures() {
   const { log, toggleWishlist } = useLog();
-  const unvisited = CITIES.filter(
-    (city) => ratingOf(log, city.id) === null && !log.wishlist.includes(city.id),
-  );
+  const [term, setTerm] = useState("");
+
+  const matches = useMemo(() => {
+    if (!term.trim()) return [];
+    return searchCities(CITIES, term)
+      .filter((match) => !log.wishlist.includes(match.city.id))
+      .slice(0, 6);
+  }, [term, log.wishlist]);
+
+  const completion = inlineCompletion(matches, term);
 
   return (
     <section className="screen">
       <h2>Departures</h2>
       <p className="lede">
-        Where you're going, rather than where you've been. Logging a visit takes a city off this
+        Where you're going, rather than where you've been. Log a visit and the city comes off this
         board on its own — you got there.
       </p>
 
-      {log.wishlist.length === 0 ? (
-        <p className="empty">Nothing booked. Add a city from its page, or from the list below.</p>
-      ) : (
-        <div className="grid">
-          {log.wishlist.map((id) => {
-            const city = requireCity(id);
-            return (
-              <div className="departure" key={id}>
-                <Link to={`/city/${id}`}>
-                  <CityCard city={city} rating={ratingOf(log, id)} />
-                </Link>
-                <button className="ghost" onClick={() => toggleWishlist(id)}>
-                  Remove
-                </button>
-              </div>
-            );
-          })}
+      <div className="add-departure">
+        <div className="typeahead">
+          <div className="ghost-text" aria-hidden="true">
+            <span className="typed">{term}</span>
+            <span className="rest">{completion}</span>
+          </div>
+          <input
+            className="search"
+            placeholder="Add a city to the board"
+            autoComplete="off"
+            value={term}
+            onChange={(event) => setTerm(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === "Tab" && completion) {
+                event.preventDefault();
+                setTerm(matches[0].city.name);
+              } else if (event.key === "Enter" && matches[0]) {
+                event.preventDefault();
+                toggleWishlist(matches[0].city.id);
+                setTerm("");
+              }
+            }}
+          />
         </div>
-      )}
 
-      {unvisited.length > 0 && (
-        <>
-          <h2 style={{ marginTop: "40px" }}>Not been, not booked</h2>
-          <div className="grid tight">
-            {unvisited.map((city) => (
-              <div className="departure" key={city.id}>
-                <Link to={`/city/${city.id}`}>
-                  <CityCard city={city} rating={null} />
-                </Link>
-                <button className="ghost" onClick={() => toggleWishlist(city.id)}>
-                  + Departures
-                </button>
-              </div>
+        {matches.length > 0 && (
+          <div className="options">
+            {matches.map(({ city }) => (
+              <button
+                key={city.id}
+                className="option"
+                onClick={() => {
+                  toggleWishlist(city.id);
+                  setTerm("");
+                }}
+              >
+                <img src={city.photo} alt="" />
+                <span>
+                  <b>{city.name}</b>
+                  <small>{city.country}</small>
+                </span>
+                <span className="right">
+                  {ratingOf(log, city.id) === null ? <small>Add</small> : <Stars value={ratingOf(log, city.id)} />}
+                </span>
+              </button>
             ))}
           </div>
-        </>
+        )}
+      </div>
+
+      {log.wishlist.length === 0 ? (
+        <p className="empty">
+          Nothing on the board yet. Search above, or use the <b>+</b> on any city in Cities.
+        </p>
+      ) : (
+        <div className="grid">
+          {log.wishlist.map((id) => (
+            <CityCard
+              key={id}
+              city={requireCity(id)}
+              to={`/city/${id}`}
+              rating={ratingOf(log, id)}
+              wished
+              onToggleWish={() => toggleWishlist(id)}
+            />
+          ))}
+        </div>
       )}
     </section>
   );

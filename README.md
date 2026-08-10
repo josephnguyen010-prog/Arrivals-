@@ -55,9 +55,9 @@ catalogue problem is solved.
 
 ## Departures
 
-The watchlist, named for the other half of the board. Cities you mean to reach, added from a city
-page or from the Departures screen. Logging a visit takes a city off by itself — the board is what's
-still ahead of you, and if you want to go back you can put it on again.
+The watchlist, named for the other half of the board. Add a city from the search on the Departures
+screen, or from the `+` in the corner of any card in Cities. Logging a visit takes a city off by
+itself — the board is what's still ahead of you, and if you want to go back you can put it on again.
 
 ## Spots
 
@@ -86,9 +86,9 @@ src/
   lib/ranking.ts        the insertion logic, pure and tested
   lib/storage.ts        the only file that knows where the log lives
   lib/lists.ts          list persistence
-  lib/search.ts         the city typeahead's ranking, pure and tested
+  lib/search.ts         typeahead ranking and inline completion, pure and tested
   lib/spots.ts          spot storage, link validation, photo downscaling
-  state/                LogContext, ListsContext and SpotsContext
+  state/                LogContext, ListsContext, SpotsContext and ProfileContext
   data/                 city catalogue, photo credits, seed data
   components/           Stars, CityCard, Stamp, ArrivalStamp, the flows
   screens/              Activity, Cities, Departures, Passport, Lists, ListPage, CityPage
@@ -130,13 +130,14 @@ Not built yet:
   `lib/storage.ts` for a Supabase table is the whole migration for the log itself; the social half
   is a real build.
 - **A real date picker.** Step 2 offers recent months and invents a day of the month.
+- **More than 32 cities.** The catalogue is still a hand-written array; the real one is GeoNames.
 - **Sharing a list.** Lists exist and are editable, but only in your own browser. Making one
   shareable is the point of them and needs the backend.
 - **Your own photo per visit.** Spots take photos now; visits still don't.
 
 ## Photos
 
-All twelve are CC0 or attribution-only, and the credit renders on each city's page because CC BY
+All 32 are CC0, public domain or attribution-only, and the credit renders on each city's page because CC BY
 requires it to reach whoever is looking at the photo. Share-alike is deliberately excluded: it
 obliges derivative works to carry the same licence, which is a problem once photos sit inside a
 product. [CREDITS.md](CREDITS.md) has the full table and the rule for adding a city.

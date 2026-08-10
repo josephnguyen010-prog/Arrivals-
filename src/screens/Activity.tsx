@@ -1,4 +1,3 @@
-import { Link } from "react-router-dom";
 import { CityCard } from "../components/CityCard";
 import { Stars } from "../components/Stars";
 import { requireCity } from "../data/cities";
@@ -13,9 +12,7 @@ export function Activity() {
           const city = requireCity(item.city);
           return (
             <article className="entry" key={item.id}>
-              <Link to={`/city/${city.id}`} aria-label={`Open ${city.name}`}>
-                <CityCard city={city} rating={item.rating} />
-              </Link>
+              <CityCard city={city} to={`/city/${city.id}`} rating={item.rating} />
               <div>
                 <div className="who-line">
                   <b>{item.who}</b>
