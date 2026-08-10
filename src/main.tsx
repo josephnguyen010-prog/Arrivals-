@@ -1,7 +1,7 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 // Hash routing: this gets served from a GitHub Pages sub-path, where a real
-// path like /postmark/cities would 404 on refresh because Pages has no SPA
+// path like /arrivals/cities would 404 on refresh because Pages has no SPA
 // fallback. The hash never reaches the server.
 import { HashRouter } from "react-router-dom";
 import { App } from "./App";

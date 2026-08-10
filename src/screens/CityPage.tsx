@@ -89,7 +89,7 @@ export function CityPage() {
                   <time>
                     {visit.day} {visit.when}
                   </time>
-                  <span>Postmarked</span>
+                  <span>Stamped</span>
                 </li>
               ))}
             </ul>

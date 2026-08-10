@@ -1,11 +1,13 @@
 import type { CityId, CityList } from "../types";
 
-const KEY = "postmark.lists.v1";
+const KEY = "arrivals.lists.v1";
+/** Pre-rename key. Read once so a rename doesn't wipe someone's lists. */
+const LEGACY_KEY = "postmark.lists.v1";
 
 /** Lists you made, kept beside the ones from people you follow. */
 export function loadMyLists(): CityList[] {
   try {
-    const raw = localStorage.getItem(KEY);
+    const raw = localStorage.getItem(KEY) ?? localStorage.getItem(LEGACY_KEY);
     if (!raw) return [];
     const parsed = JSON.parse(raw);
     if (!Array.isArray(parsed)) return [];

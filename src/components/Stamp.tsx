@@ -1,5 +1,5 @@
 import type { City } from "../types";
-import { Postmark } from "./Postmark";
+import { ArrivalStamp } from "./ArrivalStamp";
 import { Stars } from "./Stars";
 
 interface StampProps {
@@ -19,14 +19,14 @@ export function Stamp({ city, rating, date }: StampProps) {
     <div className="stamp">
       <div className="pic">
         <img src={city.photo} alt={city.name} />
-        {rating !== null && <Postmark city={city} date={date ?? "—"} />}
+        {rating !== null && <ArrivalStamp city={city} date={date ?? "—"} />}
       </div>
       <div className="plate">
         <div>
           <div className="city">{city.name}</div>
           <div className="country">{city.country}</div>
         </div>
-        {rating !== null ? <Stars value={rating} size={14} /> : <span className="unfranked">UNFRANKED</span>}
+        {rating !== null ? <Stars value={rating} size={14} /> : <span className="unfranked">UNSTAMPED</span>}
       </div>
     </div>
   );

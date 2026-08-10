@@ -1,7 +1,9 @@
 import type { LogState } from "../types";
 import { SEED_LOG } from "../data/seed";
 
-const KEY = "postmark.log.v1";
+const KEY = "arrivals.log.v1";
+/** Pre-rename key. Read once so a rename doesn't wipe someone's log. */
+const LEGACY_KEY = "postmark.log.v1";
 
 /**
  * Local-only for now. Swapping this pair of functions for a Supabase table is
@@ -9,7 +11,7 @@ const KEY = "postmark.log.v1";
  */
 export function loadLog(): LogState {
   try {
-    const raw = localStorage.getItem(KEY);
+    const raw = localStorage.getItem(KEY) ?? localStorage.getItem(LEGACY_KEY);
     if (!raw) return SEED_LOG;
     const parsed = JSON.parse(raw) as Partial<LogState>;
     if (!parsed || typeof parsed !== "object" || !parsed.rated || !Array.isArray(parsed.visits)) {

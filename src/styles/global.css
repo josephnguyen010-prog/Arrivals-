@@ -1052,7 +1052,7 @@ select option {
   background: var(--stamp-bg);
   padding: 8px 8px 0;
   display: block;
-  color: var(--postmark);
+  color: var(--stamp-ink);
   filter: drop-shadow(0 3px 8px rgba(0, 0, 0, 0.2));
 }
 

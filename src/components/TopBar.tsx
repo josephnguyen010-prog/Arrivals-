@@ -8,7 +8,7 @@ interface TopBarProps {
 const LINKS = [
   { to: "/", label: "Activity", end: true },
   { to: "/cities", label: "Cities", end: false },
-  { to: "/passport", label: "Passport", end: false },
+  { to: "/passport", label: "MyPassport", end: false },
   { to: "/lists", label: "Lists", end: false },
 ];
 
@@ -21,7 +21,7 @@ export function TopBar({ onLogVisit }: TopBarProps) {
       <header className="topbar">
         <div className="topbar-in">
           <div className="wordmark">
-            <b>Postmark</b>
+            <b>Arrivals</b>
             <span>Cities, logged</span>
           </div>
           <nav className="nav">

@@ -1,12 +1,19 @@
-# Postmark
+# Arrivals
 
 Letterboxd, but for cities. Rate the places you've been, log every trip separately, and keep a
 ranking that's built from comparisons rather than guesswork.
 
-**Postmark is a working title.** The name is taken — [postmarkapp.com](https://postmarkapp.com) is
-ActiveCampaign's transactional email service, well known among developers, which is the worst
-audience to collide with. `Franked` is the leading alternative; the app already says "UNFRANKED"
-on cities you haven't been to.
+**Arrivals is a working title**, named for the arrival stamp in a passport and the board in an
+airport. It replaced `Postmark`, which collided with ActiveCampaign's transactional email service —
+a developer-facing product, and so the worst possible audience to share a name with.
+
+Worth knowing if the name comes up again: the stamp-flavoured names are saturated by direct
+competitors in exactly this category. **Stamped: Travel Tracker & Map**, **Stamp: Travel Tracker**,
+**Stampie** and **WanderStamp** all already track places you've been, and **Passage** is a travel
+app too. `Arrivals` and `Port of Entry` were the passport words left standing.
+
+The trade-off: a common English word is hard to trademark and hard to search for. `Port of Entry` is
+more ownable and more literally passport, but it's three words and shortens badly.
 
 ## Running it
 
@@ -19,14 +26,14 @@ npm run build    # typecheck + production build
 
 ## Where it's deployed
 
-A copy of the build is served from the portfolio at `/postmark/`. Two things make that work, and
+A copy of the build is served from the portfolio at `/arrivals/`. Two things make that work, and
 both matter if you move it anywhere else:
 
 - `base: "./"` in `vite.config.ts`, so asset paths are relative and survive any sub-path.
 - `HashRouter` rather than `BrowserRouter`. GitHub Pages has no SPA fallback, so a real path like
-  `/postmark/cities` would 404 on refresh. The hash never reaches the server.
+  `/arrivals/cities` would 404 on refresh. The hash never reaches the server.
 
-To update the copy in the portfolio: `npm run build`, then replace `public/postmark/` there.
+To update the copy in the portfolio: `npm run build`, then replace `public/arrivals/` there.
 
 ## The idea
 
@@ -40,7 +47,7 @@ question or two in practice. The ordering that falls out is a real ranked list, 
 
 **You rate the city, but you log the trip.** Films get watched a hundred times a year; cities get
 visited maybe three. A city-shaped log would be too quiet to be worth opening. So the unit is a
-visit, and the Passport screen shows them in order, with repeat trips marked `↻ visit 2`.
+visit, and the MyPassport screen shows them in order, with repeat trips marked `↻ visit 2`.
 
 **Cities are a finite, canonical catalogue.** That's the property Letterboxd relies on and
 restaurant apps have to fight for. A few thousand cities from GeoNames or Wikidata and the
@@ -55,7 +62,7 @@ src/
   lib/lists.ts          list persistence
   state/                LogContext and ListsContext
   data/                 city catalogue, photo credits, seed data
-  components/           Stars, CityCard, Stamp, Postmark, histogram, the flows
+  components/           Stars, CityCard, Stamp, ArrivalStamp, histogram, the flows
   screens/              Activity, Cities, Passport, Lists, ListPage, CityPage
   styles/tokens.css     the palette, both themes
 ```
@@ -74,6 +81,14 @@ and luggage tags. Both themes are first-class; the toggle in the top bar overrid
 
 The perforated stamp is the one loud element, so it's kept to the city page and the moment a visit
 is logged. Everywhere else cities are quiet rectangles, because a grid is for scanning.
+
+**One loose end after the rename.** The identity was drawn for a postal name — the perforated edge
+is a postage stamp, and the diagonal red-and-blue rule is an airmail envelope. The circular
+cancellation mark survives the move intact, because a passport entry stamp genuinely looks like
+that: a ring, the port of entry arced over the top, the date across the middle. The perforations and
+the airmail stripe are the parts still arguing for the old name. Moving them to a visa-page
+treatment — guilloche, a torn edge, a document number — would settle it, but that's a redesign
+rather than a rename.
 
 ## State of it
 

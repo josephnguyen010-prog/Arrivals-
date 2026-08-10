@@ -37,7 +37,8 @@ export function App() {
         </p>
         <p className="note">
           Photographs from Wikimedia Commons, all CC0 or attribution-only, credited on each city's
-          page and in CREDITS.md. Friends and their notes are invented.
+          page and in CREDITS.md. Friends and their notes are invented. <b>Arrivals</b> is a working
+          title.
         </p>
       </div>
 

@@ -4,7 +4,7 @@ export interface City {
   id: CityId;
   name: string;
   country: string;
-  /** ISO 3166-1 alpha-3, printed on the postmark. */
+  /** ISO 3166-1 alpha-3, printed on the arrival stamp. */
   cc: string;
   region: "Asia" | "Europe" | "Americas" | "Africa" | "Oceania";
   photo: string;
