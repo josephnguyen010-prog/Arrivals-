@@ -26,6 +26,7 @@ export const SEED_LOG: LogState = {
     { id: "v12", city: "lisbon", when: "Jul 2021", day: "24" },
     { id: "v13", city: "bsas", when: "Dec 2019", day: "30" },
   ],
+  wishlist: ["seoul", "marra", "porto"],
 };
 
 /** Fictional accounts. A real feed comes from whoever you follow. */

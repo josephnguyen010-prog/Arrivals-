@@ -1,15 +1,19 @@
+import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { PhotoCreditLine } from "../components/PhotoCreditLine";
+import { SpotForm } from "../components/SpotForm";
+import { SpotList } from "../components/SpotList";
 import { Stamp } from "../components/Stamp";
 import { Stars } from "../components/Stars";
 import { cityById } from "../data/cities";
 import { FEED } from "../data/seed";
-import { rankOf, ratingOf, visitsFor } from "../lib/ranking";
+import { isWished, rankOf, ratingOf, visitsFor } from "../lib/ranking";
 import { useLog } from "../state/LogContext";
 
 export function CityPage() {
   const { id = "" } = useParams();
-  const { log } = useLog();
+  const { log, toggleWishlist } = useLog();
+  const [addingSpot, setAddingSpot] = useState(false);
   const city = cityById(id);
 
   if (!city) {
@@ -24,6 +28,7 @@ export function CityPage() {
   }
 
   const rating = ratingOf(log, city.id);
+  const wished = isWished(log, city.id);
   const rank = rankOf(log, city.id);
   const visits = visitsFor(log, city.id);
   const friends = FEED.filter((item) => item.city === city.id);
@@ -73,10 +78,31 @@ export function CityPage() {
               ? "Log a visit and it slots into your ranking."
               : `Ranked against the other cities you gave ${rating} stars.`}
           </p>
+
+          <button
+            className={wished ? "wish-btn on" : "wish-btn"}
+            aria-pressed={wished}
+            onClick={() => toggleWishlist(city.id)}
+          >
+            {wished ? "✓ On your Departures board" : "+ Add to Departures"}
+          </button>
         </div>
       </div>
 
-      <div className="two-col">
+      <div className="spots-head">
+        <h2 style={{ border: "none", margin: 0, padding: 0 }}>Spots</h2>
+        <button className="ghost" onClick={() => setAddingSpot(true)}>
+          + Add a spot
+        </button>
+      </div>
+      <p className="lede">
+        The things you'd actually tell someone about {city.name} — with a link or a photo if you have one.
+      </p>
+      <SpotList city={city.id} />
+
+      {addingSpot && <SpotForm city={city} onClose={() => setAddingSpot(false)} />}
+
+      <div className="two-col" style={{ marginTop: "36px" }}>
         <div>
           <h2>Your visits</h2>
           {visits.length === 0 ? (

@@ -7,6 +7,7 @@ import { HashRouter } from "react-router-dom";
 import { App } from "./App";
 import { ListsProvider } from "./state/ListsContext";
 import { LogProvider } from "./state/LogContext";
+import { SpotsProvider } from "./state/SpotsContext";
 import "./styles/global.css";
 
 const container = document.getElementById("root");
@@ -17,7 +18,9 @@ createRoot(container).render(
     <HashRouter>
       <LogProvider>
         <ListsProvider>
-          <App />
+          <SpotsProvider>
+            <App />
+          </SpotsProvider>
         </ListsProvider>
       </LogProvider>
     </HashRouter>

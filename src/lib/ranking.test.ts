@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
 import type { LogState } from "../types";
 import {
+  addVisit,
   finishPlacement,
+  isWished,
   nextOpponent,
   orderedIds,
   questionsLeft,
@@ -9,10 +11,16 @@ import {
   ratingOf,
   recordAnswer,
   startPlacement,
+  toggleWish,
   visitOrdinals,
 } from "./ranking";
 
-const empty: LogState = { rated: {}, visits: [] };
+/** Builds a log without repeating the empty fields at every call site. */
+function log(partial: Partial<LogState> = {}): LogState {
+  return { rated: {}, visits: [], wishlist: [], ...partial };
+}
+
+const empty: LogState = log();
 
 /** Places a city by answering every duel with a fixed preference function. */
 function place(
@@ -52,7 +60,7 @@ describe("placing a city", () => {
   });
 
   it("lands a city in the middle when it beats one and loses to another", () => {
-    let state: LogState = { rated: { "4": ["best", "worst"] }, visits: [] };
+    let state: LogState = log({ rated: { "4": ["best", "worst"] } });
     state = place(state, "middle", 4, (opponent) => opponent === "worst").state;
     expect(state.rated["4"]).toEqual(["best", "middle", "worst"]);
   });
@@ -70,7 +78,7 @@ describe("placing a city", () => {
 
 describe("re-rating a city", () => {
   it("moves it out of its old rating rather than duplicating it", () => {
-    let state: LogState = { rated: { "5": ["tokyo"], "3": ["osaka"] }, visits: [] };
+    let state: LogState = log({ rated: { "5": ["tokyo"], "3": ["osaka"] } });
     state = place(state, "tokyo", 3, () => true).state;
     expect(state.rated["5"]).toEqual([]);
     expect(state.rated["3"]).toEqual(["tokyo", "osaka"]);
@@ -78,14 +86,14 @@ describe("re-rating a city", () => {
   });
 
   it("does not compare a city against itself", () => {
-    const state: LogState = { rated: { "4": ["tokyo"] }, visits: [] };
+    const state: LogState = log({ rated: { "4": ["tokyo"] } });
     const { state: cleaned, placement } = startPlacement(state, "tokyo", 4);
     expect(nextOpponent(cleaned, placement)).toBeNull();
   });
 });
 
 describe("reading the ranking", () => {
-  const state: LogState = { rated: { "5": ["a"], "4.5": ["b", "c"], "2": ["d"] }, visits: [] };
+  const state: LogState = log({ rated: { "5": ["a"], "4.5": ["b", "c"], "2": ["d"] } });
 
   it("orders by rating first, then by position inside it", () => {
     expect(orderedIds(state)).toEqual(["a", "b", "c", "d"]);
@@ -109,6 +117,33 @@ describe("questionsLeft", () => {
   it("halves as the bracket narrows", () => {
     expect(questionsLeft({ cityId: "x", rating: 4, lo: 0, hi: 7, asked: 0 })).toBe(3);
     expect(questionsLeft({ cityId: "x", rating: 4, lo: 0, hi: 3, asked: 1 })).toBe(2);
+  });
+});
+
+describe("Departures", () => {
+  it("adds and removes a city", () => {
+    let state = toggleWish(empty, "seoul");
+    expect(isWished(state, "seoul")).toBe(true);
+    state = toggleWish(state, "seoul");
+    expect(isWished(state, "seoul")).toBe(false);
+  });
+
+  it("puts the newest intention first", () => {
+    const state = toggleWish(toggleWish(empty, "seoul"), "porto");
+    expect(state.wishlist).toEqual(["porto", "seoul"]);
+  });
+
+  it("drops a city off the board once you log a visit to it", () => {
+    const state = log({ wishlist: ["seoul", "porto"] });
+    const after = addVisit(state, { id: "v1", city: "seoul", when: "Aug 2026", day: "04" });
+    expect(after.wishlist).toEqual(["porto"]);
+    expect(after.visits).toHaveLength(1);
+  });
+
+  it("leaves the board alone when the visit was somewhere else", () => {
+    const state = log({ wishlist: ["seoul"] });
+    const after = addVisit(state, { id: "v1", city: "tokyo", when: "Aug 2026", day: "04" });
+    expect(after.wishlist).toEqual(["seoul"]);
   });
 });
 

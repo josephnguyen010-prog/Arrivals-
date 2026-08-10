@@ -1,7 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
 import type { CityId, LogState, Visit } from "../types";
-import { addVisit, finishPlacement, startPlacement } from "../lib/ranking";
+import { addVisit, finishPlacement, startPlacement, toggleWish } from "../lib/ranking";
 import { clearLog, loadLog, saveLog } from "../lib/storage";
 import type { Placement } from "../types";
 
@@ -11,6 +11,8 @@ interface LogContextValue {
   commitVisit: (placement: Placement, visit: Omit<Visit, "id">) => void;
   /** Prepares an insertion; the flow drives it and hands back the result. */
   begin: (cityId: CityId, rating: number) => { state: LogState; placement: Placement };
+  /** Adds or removes a city from Departures. */
+  toggleWishlist: (cityId: CityId) => void;
   reset: () => void;
 }
 
@@ -38,12 +40,19 @@ export function LogProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
+  const toggleWishlist = useCallback((cityId: CityId) => {
+    setLog((current) => toggleWish(current, cityId));
+  }, []);
+
   const reset = useCallback(() => {
     clearLog();
     setLog(loadLog());
   }, []);
 
-  const value = useMemo(() => ({ log, commitVisit, begin, reset }), [log, commitVisit, begin, reset]);
+  const value = useMemo(
+    () => ({ log, commitVisit, begin, toggleWishlist, reset }),
+    [log, commitVisit, begin, toggleWishlist, reset],
+  );
 
   return <LogContext.Provider value={value}>{children}</LogContext.Provider>;
 }

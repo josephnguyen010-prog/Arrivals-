@@ -17,7 +17,12 @@ export function loadLog(): LogState {
     if (!parsed || typeof parsed !== "object" || !parsed.rated || !Array.isArray(parsed.visits)) {
       return SEED_LOG;
     }
-    return { rated: parsed.rated, visits: parsed.visits };
+    return {
+      rated: parsed.rated,
+      visits: parsed.visits,
+      // Logs written before Departures existed have no wishlist.
+      wishlist: Array.isArray(parsed.wishlist) ? parsed.wishlist : [],
+    };
   } catch {
     // Corrupt or unavailable storage shouldn't cost you the app.
     return SEED_LOG;

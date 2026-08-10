@@ -18,6 +18,7 @@ export function ProfileHeader() {
         <Stat value={ratedCount(log)} label="Cities" />
         <Stat value={log.visits.length} label="Visits" />
         <Stat value={countries.size} label="Countries" />
+        <Stat value={log.wishlist.length} label="Departures" />
         <Stat value={LISTS.length} label="Lists" />
       </div>
     </section>

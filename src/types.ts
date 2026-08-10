@@ -26,6 +26,29 @@ export interface Visit {
 export interface LogState {
   rated: Record<string, CityId[]>;
   visits: Visit[];
+  /** Departures: cities you mean to reach, newest intention first. */
+  wishlist: CityId[];
+}
+
+export const SPOT_CATEGORIES = [
+  "Favourite restaurant",
+  "Hidden gem",
+  "Must-see view",
+  "Skip it",
+] as const;
+
+export type SpotCategory = (typeof SPOT_CATEGORIES)[number];
+
+export interface Spot {
+  id: string;
+  city: CityId;
+  category: SpotCategory;
+  name: string;
+  note?: string;
+  /** Already validated as http(s) before it is stored. */
+  url?: string;
+  /** A downscaled JPEG data URL — the original never reaches storage. */
+  photo?: string;
 }
 
 /** An in-flight insertion. `lo`/`hi` bracket the slot the city belongs in. */

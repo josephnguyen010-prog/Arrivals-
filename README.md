@@ -53,6 +53,32 @@ visit, and the MyPassport screen shows them in order, with repeat trips marked `
 restaurant apps have to fight for. A few thousand cities from GeoNames or Wikidata and the
 catalogue problem is solved.
 
+## Departures
+
+The watchlist, named for the other half of the board. Cities you mean to reach, added from a city
+page or from the Departures screen. Logging a visit takes a city off by itself — the board is what's
+still ahead of you, and if you want to go back you can put it on again.
+
+## Spots
+
+Under every city, the things you'd actually tell someone about, filed under **Favourite restaurant**,
+**Hidden gem**, **Must-see view** or **Skip it**. Each takes an optional link and an optional photo.
+
+Two things worth knowing about how they're stored:
+
+- **Photos are downscaled before they're stored, never after.** A phone photo is several megabytes
+  and `localStorage` is a few for the whole origin, so `downscaleImage` caps the longest edge at
+  900px and re-encodes as JPEG, which lands around 60–120KB. The total is checked against a budget
+  before every write, and the form reports a full store instead of failing silently.
+- **Pasted links are validated, not trusted.** `safeUrl` accepts a bare host and assumes https, but
+  returns null for anything that doesn't resolve to http(s) — `javascript:` above all — so the save
+  button stays disabled and nothing unsafe is ever put in an `href`. Links render with
+  `rel="noreferrer noopener"`. It's tested.
+
+`Skip it` was my addition to the three categories. A negative recommendation is genuinely useful
+and rare in travel apps, but it changes the tone — drop it from `SPOT_CATEGORIES` if you'd rather
+the section stayed positive.
+
 ## Layout
 
 ```
@@ -61,10 +87,11 @@ src/
   lib/storage.ts        the only file that knows where the log lives
   lib/lists.ts          list persistence
   lib/search.ts         the city typeahead's ranking, pure and tested
-  state/                LogContext and ListsContext
+  lib/spots.ts          spot storage, link validation, photo downscaling
+  state/                LogContext, ListsContext and SpotsContext
   data/                 city catalogue, photo credits, seed data
   components/           Stars, CityCard, Stamp, ArrivalStamp, the flows
-  screens/              Activity, Cities, Passport, Lists, ListPage, CityPage
+  screens/              Activity, Cities, Departures, Passport, Lists, ListPage, CityPage
   styles/tokens.css     the palette, both themes
 ```
 
@@ -93,8 +120,9 @@ rather than a rename.
 
 ## State of it
 
-Working: rating, the comparison flow, the ranking, filters and sorts, the MyPassport screen,
-per-city pages, lists you can create and reorder, both themes, and persistence to `localStorage`.
+Working: rating, the comparison flow, the ranking, filters and sorts, Departures, spots with links
+and photos, the MyPassport screen, per-city pages, lists you can create and reorder, both themes,
+and persistence to `localStorage`.
 
 Not built yet:
 
@@ -104,7 +132,7 @@ Not built yet:
 - **A real date picker.** Step 2 offers recent months and invents a day of the month.
 - **Sharing a list.** Lists exist and are editable, but only in your own browser. Making one
   shareable is the point of them and needs the backend.
-- **Your own photo per visit.** The better long-term answer to the licensing question below.
+- **Your own photo per visit.** Spots take photos now; visits still don't.
 
 ## Photos
 

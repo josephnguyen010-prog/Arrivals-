@@ -93,7 +93,25 @@ export function finishPlacement(state: LogState, placement: Placement): LogState
 }
 
 export function addVisit(state: LogState, visit: Visit): LogState {
-  return { ...state, visits: [visit, ...state.visits] };
+  return {
+    ...state,
+    visits: [visit, ...state.visits],
+    // You went. Departures is what's still ahead of you, so it comes off.
+    wishlist: state.wishlist.filter((id) => id !== visit.city),
+  };
+}
+
+export function isWished(state: LogState, id: CityId): boolean {
+  return state.wishlist.includes(id);
+}
+
+export function toggleWish(state: LogState, id: CityId): LogState {
+  return {
+    ...state,
+    wishlist: state.wishlist.includes(id)
+      ? state.wishlist.filter((cityId) => cityId !== id)
+      : [id, ...state.wishlist],
+  };
 }
 
 /**

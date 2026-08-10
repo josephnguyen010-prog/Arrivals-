@@ -6,6 +6,7 @@ import { TopBar } from "./components/TopBar";
 import { Activity } from "./screens/Activity";
 import { Cities } from "./screens/Cities";
 import { CityPage } from "./screens/CityPage";
+import { Departures } from "./screens/Departures";
 import { ListPage } from "./screens/ListPage";
 import { Lists } from "./screens/Lists";
 import { Passport } from "./screens/Passport";
@@ -23,6 +24,7 @@ export function App() {
         <Routes>
           <Route path="/" element={<Activity />} />
           <Route path="/cities" element={<Cities />} />
+          <Route path="/departures" element={<Departures />} />
           <Route path="/passport" element={<Passport />} />
           <Route path="/lists" element={<Lists />} />
           <Route path="/list/:id" element={<ListPage />} />
