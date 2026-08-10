@@ -290,63 +290,51 @@ h2 {
   text-align: left;
 }
 
+/* A star row stands in for the number, so it needs the same block spacing. */
+.pstat > .stars {
+  display: block;
+  margin-bottom: 2px;
+}
+
 /* ------------------------------------------------------------ stars --- */
 
 .stars {
-  position: relative;
   display: inline-block;
-  font-size: 13px;
-  line-height: 1;
-  color: var(--rule);
-  letter-spacing: 0.06em;
-  white-space: nowrap;
-}
-
-.stars::before {
-  content: "\2605\2605\2605\2605\2605";
-}
-
-.stars i {
-  position: absolute;
-  left: 0;
-  top: 0;
-  overflow: hidden;
-  white-space: nowrap;
-  color: var(--accent);
-  width: calc(var(--v) / 5 * 100%);
-}
-
-.stars i::before {
-  content: "\2605\2605\2605\2605\2605";
+  vertical-align: middle;
+  /* Drawn as SVG, so nothing here inherits a text weight. */
+  overflow: visible;
 }
 
 .stars.none {
-  opacity: 0.5;
+  width: 0;
+  height: 0;
 }
 
 /* ----------------------------------------------------------- filters -- */
 
-.filters {
+/* A row of dropdowns that name themselves, so the bar reads as a sentence
+   rather than a form. A set filter is tinted, so you can see at a glance
+   that the grid is showing you less than everything. */
+.filterbar {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   padding-bottom: 10px;
   margin-bottom: 20px;
   border-bottom: 1px solid var(--rule);
   flex-wrap: wrap;
 }
 
-.filters .spacer {
+.filterbar .spacer {
   flex: 1;
 }
 
-.filters label {
+.sort-label {
   font-family: var(--mono);
   font-size: 10.5px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--muted);
-  margin-right: 4px;
 }
 
 select {
@@ -364,6 +352,38 @@ select {
 
 select:hover {
   border-color: var(--accent);
+}
+
+.filter {
+  border-color: transparent;
+  background-color: transparent;
+  color: var(--muted);
+  padding: 6px 8px;
+}
+
+.filter:hover {
+  color: var(--ink);
+  background-color: var(--surface);
+  border-color: transparent;
+}
+
+.filter.on {
+  background-color: var(--surface);
+  color: var(--ink);
+  box-shadow: inset 0 -2px 0 var(--accent);
+}
+
+.density {
+  font-size: 14px;
+  line-height: 1;
+  color: var(--muted);
+  padding: 6px 8px;
+  border-radius: 2px;
+}
+
+.density:hover {
+  color: var(--ink);
+  background: var(--surface);
 }
 
 /* The popup list is drawn by the OS, so it needs its colours stated outright
@@ -677,107 +697,6 @@ select option {
   color: var(--muted);
   margin: 0 16px;
   display: block;
-}
-
-/* -------------------------------------------------------- histogram --- */
-
-.histogram {
-  border: 1px solid var(--rule);
-  border-radius: 3px;
-  background: var(--surface);
-  padding: 14px 16px 10px;
-  margin-bottom: 22px;
-}
-
-.histogram-head {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 10px;
-}
-
-.histogram-title,
-.histogram-note {
-  font-family: var(--mono);
-  font-size: 10.5px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--muted);
-}
-
-.histogram-note {
-  color: var(--accent);
-}
-
-.bars {
-  display: flex;
-  align-items: flex-end;
-  gap: 3px;
-  height: 64px;
-}
-
-.bar {
-  flex: 1;
-  height: 100%;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  align-items: stretch;
-  position: relative;
-  border-radius: 2px 2px 0 0;
-}
-
-.bar-fill {
-  display: block;
-  height: var(--h);
-  min-height: 2px;
-  background: var(--air-blue);
-  border-radius: 2px 2px 0 0;
-  transition: background 0.15s ease;
-}
-
-.bar:disabled .bar-fill {
-  background: var(--rule);
-}
-
-.bar:not(:disabled):hover .bar-fill,
-.bar.active .bar-fill {
-  background: var(--accent);
-}
-
-.bar-count {
-  position: absolute;
-  top: -2px;
-  left: 0;
-  right: 0;
-  text-align: center;
-  font-family: var(--mono);
-  font-size: 10px;
-  color: var(--muted);
-  font-variant-numeric: tabular-nums;
-}
-
-.histogram-axis {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 6px;
-  font-family: var(--mono);
-  font-size: 10px;
-  letter-spacing: 0.1em;
-  color: var(--muted);
-}
-
-.filter-pin {
-  font-family: var(--mono);
-  font-size: 11.5px;
-  letter-spacing: 0.06em;
-  color: var(--muted);
-  margin: -8px 0 18px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
 }
 
 /* ------------------------------------------------------------ lists --- */
@@ -1107,12 +1026,11 @@ select option {
   margin-top: 3px;
 }
 
+/* The stamp is printed on cream in either theme, so its stars keep the light
+   palette rather than following the page. */
 .stamp .stars {
-  color: #c3beb0;
-}
-
-.stamp .stars i {
-  color: var(--air-red);
+  --accent: #c8402f;
+  --star-empty: #bdb5a3;
 }
 
 .stamp .unfranked {
@@ -1206,8 +1124,17 @@ select option {
   width: 100%;
 }
 
-.option:hover {
+/* Hover and keyboard share one highlight, so arrowing down and moving the
+   mouse never light up two rows at once. */
+.option:hover,
+.option[data-active="true"] {
   background: var(--surface-2);
+}
+
+.option mark {
+  background: none;
+  color: var(--accent);
+  font-weight: inherit;
 }
 
 .option img {
@@ -1266,32 +1193,11 @@ select option {
 }
 
 .picker-stars {
-  position: relative;
-  font-size: 44px;
-  line-height: 1;
-  letter-spacing: 0.06em;
-  color: var(--rule);
+  width: min(280px, 100%);
+  height: auto;
   cursor: pointer;
-  white-space: nowrap;
   user-select: none;
-}
-
-.picker-stars::before {
-  content: "\2605\2605\2605\2605\2605";
-}
-
-.picker-stars i {
-  position: absolute;
-  left: 0;
-  top: 0;
-  overflow: hidden;
-  white-space: nowrap;
-  color: var(--accent);
-  pointer-events: none;
-}
-
-.picker-stars i::before {
-  content: "\2605\2605\2605\2605\2605";
+  display: block;
 }
 
 .picker-read {

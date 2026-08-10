@@ -1,7 +1,9 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import type { KeyboardEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { CITIES, requireCity } from "../data/cities";
 import { nextOpponent, questionsLeft, rankOf, ratingOf, recordAnswer, visitsFor } from "../lib/ranking";
+import { searchCities } from "../lib/search";
 import { useLog } from "../state/LogContext";
 import type { CityId, LogState, Placement } from "../types";
 import { CityCard } from "./CityCard";
@@ -102,15 +104,32 @@ export function LogVisitFlow({ onClose }: { onClose: () => void }) {
 function PickCity({ onPick, onClose }: { onPick: (id: CityId) => void; onClose: () => void }) {
   const { log } = useLog();
   const [term, setTerm] = useState("");
+  const [active, setActive] = useState(0);
+  const listRef = useRef<HTMLDivElement>(null);
 
-  const matches = useMemo(() => {
-    const needle = term.trim().toLowerCase();
-    if (!needle) return CITIES;
-    return CITIES.filter(
-      (city) =>
-        city.name.toLowerCase().includes(needle) || city.country.toLowerCase().includes(needle),
-    );
+  const matches = useMemo(() => searchCities(CITIES, term), [term]);
+
+  // The best match is highlighted, so typing another letter has to reset it.
+  useEffect(() => {
+    setActive(0);
   }, [term]);
+
+  useEffect(() => {
+    listRef.current?.querySelector<HTMLElement>('[data-active="true"]')?.scrollIntoView({ block: "nearest" });
+  }, [active]);
+
+  function onKeyDown(event: KeyboardEvent<HTMLInputElement>) {
+    if (event.key === "ArrowDown") {
+      event.preventDefault();
+      setActive((current) => Math.min(matches.length - 1, current + 1));
+    } else if (event.key === "ArrowUp") {
+      event.preventDefault();
+      setActive((current) => Math.max(0, current - 1));
+    } else if (event.key === "Enter" && matches[active]) {
+      event.preventDefault();
+      onPick(matches[active].city.id);
+    }
+  }
 
   return (
     <>
@@ -118,20 +137,34 @@ function PickCity({ onPick, onClose }: { onPick: (id: CityId) => void; onClose: 
       <h3>Where did you go?</h3>
       <input
         className="search"
-        placeholder="Search cities"
+        placeholder="Start typing a city"
         autoComplete="off"
         autoFocus
+        role="combobox"
+        aria-expanded={matches.length > 0}
+        aria-controls="city-matches"
+        aria-autocomplete="list"
         value={term}
         onChange={(event) => setTerm(event.target.value)}
+        onKeyDown={onKeyDown}
       />
-      <div className="options">
-        {matches.map((city) => {
+      <div className="options" id="city-matches" role="listbox" ref={listRef}>
+        {matches.map((match, index) => {
+          const { city, at } = match;
           const rating = ratingOf(log, city.id);
           return (
-            <button key={city.id} className="option" onClick={() => onPick(city.id)}>
+            <button
+              key={city.id}
+              className="option"
+              role="option"
+              aria-selected={index === active}
+              data-active={index === active}
+              onMouseEnter={() => setActive(index)}
+              onClick={() => onPick(city.id)}
+            >
               <img src={city.photo} alt="" />
               <span>
-                <b>{city.name}</b>
+                <b>{at ? highlight(city.name, at) : city.name}</b>
                 <small>{city.country}</small>
               </span>
               <span className="right">
@@ -142,11 +175,22 @@ function PickCity({ onPick, onClose }: { onPick: (id: CityId) => void; onClose: 
         })}
         {matches.length === 0 && (
           <p className="empty" style={{ padding: "10px" }}>
-            No city by that name. In the real thing, this is where you would add one.
+            No city called “{term.trim()}”. In the real thing, this is where you would add one.
           </p>
         )}
       </div>
       <Foot onClose={onClose} />
+    </>
+  );
+}
+
+/** Wraps the matched span so you can see why a result is in the list. */
+function highlight(name: string, [from, to]: [number, number]) {
+  return (
+    <>
+      {name.slice(0, from)}
+      <mark>{name.slice(from, to)}</mark>
+      {name.slice(to)}
     </>
   );
 }

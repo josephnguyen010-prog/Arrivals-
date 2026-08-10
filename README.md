@@ -60,9 +60,10 @@ src/
   lib/ranking.ts        the insertion logic, pure and tested
   lib/storage.ts        the only file that knows where the log lives
   lib/lists.ts          list persistence
+  lib/search.ts         the city typeahead's ranking, pure and tested
   state/                LogContext and ListsContext
   data/                 city catalogue, photo credits, seed data
-  components/           Stars, CityCard, Stamp, ArrivalStamp, histogram, the flows
+  components/           Stars, CityCard, Stamp, ArrivalStamp, the flows
   screens/              Activity, Cities, Passport, Lists, ListPage, CityPage
   styles/tokens.css     the palette, both themes
 ```
@@ -92,7 +93,7 @@ rather than a rename.
 
 ## State of it
 
-Working: rating, the comparison flow, the ranking, the histogram, filters and sorts, the passport,
+Working: rating, the comparison flow, the ranking, filters and sorts, the MyPassport screen,
 per-city pages, lists you can create and reorder, both themes, and persistence to `localStorage`.
 
 Not built yet:
@@ -118,7 +119,8 @@ Ratings bunch at the top. Nobody flies somewhere hoping to file it under two sta
 bands get long while the bottom stays empty, and the comparison work concentrates in a couple of
 places. Beli avoids this because you eat somewhere mediocre every week.
 
-The histogram on the Cities screen exists to make this visible rather than leave it as a hunch — it
-shows the distribution and what share sits in the busiest band, and clicking a bar filters to it.
-That instruments the problem; it doesn't solve it. If the top two bands do swallow everything once
-there's real data, the fix is probably finer resolution up there rather than more stars overall.
+A distribution chart on the Cities screen used to show this, but it earned too much room for
+something you would look at twice, so it came out. The filter bar covers the same ground more
+cheaply: `Rating` filters to a band or an exact value, which answers "how much is stacked at 4½"
+by just showing you. If the top bands do swallow everything once there's real data, the fix is
+probably finer resolution up there rather than more stars overall.

@@ -53,9 +53,8 @@ export function CityPage() {
             ) : (
               <>
                 <div className="pstat left">
-                  <b>
-                    <Stars value={rating} size={21} />
-                  </b>
+                  {/* Not inside <b> — a bold star row is a synthesised outline. */}
+                  <Stars value={rating} size={22} />
                   <span>Your rating</span>
                 </div>
                 <div className="pstat left">
