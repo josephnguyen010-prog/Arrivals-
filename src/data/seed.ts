@@ -26,7 +26,22 @@ export const SEED_LOG: LogState = {
     { id: "v12", city: "lisbon", when: "Jul 2021", day: "24" },
     { id: "v13", city: "bsas", when: "Dec 2019", day: "30" },
   ],
-  wishlist: ["seoul", "marra", "porto"],
+  // Newest intention first, and spread across regions so the board's region
+  // filter has something to do on first run.
+  wishlist: [
+    "seoul",
+    "marra",
+    "porto",
+    "cairo",
+    "hanoi",
+    "sydney",
+    "capetown",
+    "prague",
+    "singapore",
+    "neworleans",
+    "rio",
+    "kyoto",
+  ],
 };
 
 /** Fictional accounts. A real feed comes from whoever you follow. */
@@ -38,7 +53,7 @@ export const FEED: FeedItem[] = [
     city: "ist",
     rating: 4.5,
     when: "2d",
-    note: "Stayed in Kadıköy and only crossed for the mosques. The ferry is the whole city — twenty minutes, a glass of tea, and you're somewhere with a different accent.",
+    note: "Stayed in Kadıköy and only crossed for the mosques. The ferry is the whole city: twenty minutes, a glass of tea, and you're somewhere with a different accent.",
     tags: ["Second visit", "Went alone", "10 days"],
   },
   {

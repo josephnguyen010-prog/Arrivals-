@@ -231,7 +231,7 @@ function PickWhen({
       <h2 id="log-title">Step 2 of 3</h2>
       <h3>When were you in {requireCity(city).name}?</h3>
       <p className="hint">
-        A visit, not a city. Go back next year and you log it again — the rating stays yours to change.
+        A visit, not a city. Go back next year and you log it again. The rating stays yours to change.
       </p>
       <div className="chips">
         {MONTHS.map((month) => (

@@ -1,5 +1,22 @@
 import type { CityId } from "../types";
 
+import buivien from "../assets/spots/hcmc-buivien.jpg";
+import landmark81 from "../assets/spots/hcmc-landmark81.jpg";
+import omoide from "../assets/spots/tokyo-omoide.jpg";
+import tmg from "../assets/spots/tokyo-tmg.jpg";
+import tsukiji from "../assets/spots/tokyo-tsukiji.jpg";
+import ferry from "../assets/spots/ist-ferry.jpg";
+import suleymaniye from "../assets/spots/ist-suleymaniye.jpg";
+import ladra from "../assets/spots/lisbon-ladra.jpg";
+import miradouro from "../assets/spots/lisbon-miradouro.jpg";
+import tram28 from "../assets/spots/lisbon-tram28.jpg";
+import aligre from "../assets/spots/paris-aligre.jpg";
+import montparnasse from "../assets/spots/paris-montparnasse.jpg";
+import torre from "../assets/spots/cdmx-torre.jpg";
+import fushimi from "../assets/spots/kyoto-fushimi.jpg";
+import roosevelt from "../assets/spots/nyc-tram.jpg";
+import assistens from "../assets/spots/cph-assistens.jpg";
+
 export interface PhotoCredit {
   author: string;
   licence: string;
@@ -74,6 +91,31 @@ export const PHOTO_CREDITS: Record<CityId, PhotoCredit> = {
   taipei: credit("Sinchen.Lin", "CC BY 2.0", "Taipei Skyline 2016.jpg"),
   tokyo: credit("Ville Miettinen", "CC BY 2.0", "Sunset in Shinjuku.jpg"),
   toronto: credit("Peter_Glyn", "CC0", "Toronto Skyline, Ontario Canada.jpg"),
+};
+
+/**
+ * Same rules for the seeded spot photos. Keyed by the bundled asset URL rather
+ * than by spot id, so inserting a spot can't shift a credit onto the wrong
+ * photograph. A photo you added yourself is a data URL, matches nothing here,
+ * and is credited to nobody.
+ */
+export const SPOT_PHOTO_CREDITS: Record<string, PhotoCredit> = {
+  [landmark81]: credit("Nick", "CC BY 2.0", "Vincom Landmark 81 (49012084043).jpg"),
+  [buivien]: credit("trungydang", "CC BY 3.0", "Bui vien q1 Hcm - panoramio.jpg"),
+  [tmg]: credit("Daderot", "CC0", "Tokyo Metropolitan Government Building No.1 - Shinjuku, Tokyo - DSC05442.jpg"),
+  [omoide]: credit("Dick Thomas Johnson", "CC BY 2.0", "Omoide Yokocho (53149989529).jpg"),
+  [tsukiji]: credit("Jonathan Forage", "CC0", "Sashimi at the Tsukiji Markets - Tokyo Japan (Unsplash).jpg"),
+  [ferry]: credit("Antoloji", "CC0", "Istanbul car ferrie ŞH-Erguvan.jpg"),
+  [suleymaniye]: credit("Jakub Hałun", "CC BY 4.0", "Süleymaniye Mosque, Istanbul, 20260606 0805 1307.jpg"),
+  [miradouro]: credit("Sonse", "CC BY 2.0", "Lisbon panoramic view from Miradouro da Senhora do Monte (49648892693).jpg"),
+  [ladra]: credit("Carlos Luis M C da Cruz", "Public domain", "Feira da ladra.jpg"),
+  [tram28]: credit("Yann Cœuru", "CC BY 2.0", "Lisbon - Electrico N°28 (22914497662).jpg"),
+  [montparnasse]: credit("Guilhem Vellut", "CC BY 2.0", "Tour Montparnasse @ Paris (23379715554).jpg"),
+  [aligre]: credit("Mbzt", "CC BY 4.0", "CF1625 Paris 12e marche Aligre brocante rwk.jpg"),
+  [torre]: credit("Fer9324", "CC BY 4.0", "Torre Latinoamericana de lejos.jpg"),
+  [fushimi]: credit("Balon Greyjoy", "CC0", "20181110 Fushimi Inari Torii 12.jpg"),
+  [roosevelt]: credit("Reinhard Dietrich", "CC0", "Roosevelt Island Tramway 1.jpg"),
+  [assistens]: credit("Thue", "Public domain", "Assistens Kirkegård 2.jpg"),
 };
 
 export function commonsUrl(file: string): string {

@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import type { ReactNode } from "react";
 
 interface ModalProps {
@@ -24,7 +25,9 @@ export function Modal({ onClose, labelledBy, children }: ModalProps) {
     };
   }, [onClose]);
 
-  return (
+  /* Portalled to the body because a sheet can now be opened from a star inside
+     a city card, and a dialog nested in a link inherits the link's click. */
+  return createPortal(
     <div
       className="veil"
       onMouseDown={(event) => {
@@ -35,6 +38,7 @@ export function Modal({ onClose, labelledBy, children }: ModalProps) {
         <div className="airmail" />
         <div className="sheet-body">{children}</div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

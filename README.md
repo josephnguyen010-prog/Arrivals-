@@ -95,7 +95,9 @@ Two things worth knowing about how they're stored:
 
 The section ships with sample spots for a dozen cities. The places are real and well known; the
 opinions are written for the prototype and are nobody's actual recommendations. Links use Google's
-documented Maps search URL, which resolves for any query — no invented place ids to rot.
+documented Maps search URL, which resolves for any query — no invented place ids to rot. Sixteen of
+the twenty-one carry a Commons photograph of the place itself; the five Commons has nothing for are
+left without one rather than illustrated with a stand-in.
 
 `Skip it` was my addition to the three categories. A negative recommendation is genuinely useful
 and rare in travel apps, but it changes the tone — drop it from `SPOT_CATEGORIES` if you'd rather
@@ -159,10 +161,11 @@ Not built yet:
 
 ## Photos
 
-All 44 are CC0, public domain or attribution-only, and the credit renders on each city's page because CC BY
-requires it to reach whoever is looking at the photo. Share-alike is deliberately excluded: it
-obliges derivative works to carry the same licence, which is a problem once photos sit inside a
-product. [CREDITS.md](CREDITS.md) has the full table and the rule for adding a city.
+All 44 city photographs and the 16 spot photographs are CC0, public domain or attribution-only, and
+the credit renders on the city page because CC BY requires it to reach whoever is looking at the
+photo. Share-alike is deliberately excluded: it obliges derivative works to carry the same licence,
+which is a problem once photos sit inside a product. [CREDITS.md](CREDITS.md) has both tables and
+the rule for adding a city.
 
 ## The open question
 

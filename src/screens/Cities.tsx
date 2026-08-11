@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { CityCard } from "../components/CityCard";
 import { EditCity } from "../components/EditCity";
+import { RateCity } from "../components/RateCity";
 import { CITIES, REGIONS } from "../data/cities";
 import { RATING_STEPS, isWished, orderedIds, ratingOf, visitsFor } from "../lib/ranking";
 import { useLog } from "../state/LogContext";
@@ -132,7 +133,7 @@ export function Cities() {
         <p className="empty">
           {orderedIds(log).length === 0 ? (
             <>
-              Nowhere yet. <Link to="/departures">Departures</Link> has everywhere you haven't been —
+              Nowhere yet. <Link to="/departures">Departures</Link> has everywhere you haven't been,
               or log a visit to start.
             </>
           ) : (
@@ -151,6 +152,7 @@ export function Cities() {
               wished={isWished(log, city.id)}
               onToggleWish={() => toggleWishlist(city.id)}
               onEdit={() => setEditing(city)}
+              stars={<RateCity city={city} size={13} />}
             />
           ))}
         </div>

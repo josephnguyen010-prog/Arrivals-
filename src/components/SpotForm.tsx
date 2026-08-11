@@ -91,7 +91,7 @@ export function SpotForm({ city, onClose }: SpotFormProps) {
       </label>
 
       <label className="field">
-        <span>Link — maps, a menu, anything</span>
+        <span>Link (maps, a menu, anything)</span>
         <input
           className={linkBad ? "search bad" : "search"}
           value={link}

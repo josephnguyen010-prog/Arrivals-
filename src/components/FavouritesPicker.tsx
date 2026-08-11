@@ -34,7 +34,7 @@ export function FavouritesPicker({ onClose }: { onClose: () => void }) {
       <h2 id="favourites-title">Favourites</h2>
       <h3>Your four</h3>
       <p className="hint">
-        They don't have to be your highest rated — that's what the ranking is for.
+        They don't have to be your highest rated. That's what the ranking is for.
       </p>
 
       {picks.length > 0 && (
@@ -80,7 +80,7 @@ export function FavouritesPicker({ onClose }: { onClose: () => void }) {
       {picks.length < MAX_FAVOURITES ? (
         <>
           <p className="field-label">
-            Add a city — {MAX_FAVOURITES - picks.length} slot
+            Add a city · {MAX_FAVOURITES - picks.length} slot
             {MAX_FAVOURITES - picks.length === 1 ? "" : "s"} left
           </p>
           <input

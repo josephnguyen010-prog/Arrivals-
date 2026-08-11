@@ -21,8 +21,8 @@ export function Lists() {
         </button>
       </div>
       <p className="lede">
-        The shareable object. A list is a set of cities plus an argument for why they belong together —
-        and the order is part of the argument.
+        The shareable object. A list is a set of cities plus an argument for why they belong
+        together, and the order is part of the argument.
       </p>
 
       {mine.length === 0 ? (

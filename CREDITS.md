@@ -60,6 +60,39 @@ the full record; the app is what actually discharges the obligation.
 
 Source page for any of these: `https://commons.wikimedia.org/wiki/File:<filename>`.
 
+## Spot photographs
+
+The sixteen photographs in `src/assets/spots/` come from Commons under the same rule, cropped
+square and re-encoded at 240px. Each one shows the place the spot names; the five seeded spots
+Commons has no photograph of are left without one rather than illustrated with something else.
+
+They are bundled files rather than the inline data URLs a spot you add yourself carries. The
+seeded list is written back to localStorage the first time you touch it, and sixteen data URLs
+would take a large bite out of the storage budget on their own.
+
+| Spot | Author | Licence | File |
+| --- | --- | --- | --- |
+| Landmark 81 SkyView | Nick | CC BY 2.0 | `Vincom Landmark 81 (49012084043).jpg` |
+| Bùi Viện walking street | trungydang | CC BY 3.0 | `Bui vien q1 Hcm - panoramio.jpg` |
+| Tokyo Metropolitan Government Building | Daderot | CC0 | `Tokyo Metropolitan Government Building No.1 - Shinjuku, Tokyo - DSC05442.jpg` |
+| Omoide Yokocho | Dick Thomas Johnson | CC BY 2.0 | `Omoide Yokocho (53149989529).jpg` |
+| Tsukiji Outer Market | Jonathan Forage | CC0 | `Sashimi at the Tsukiji Markets - Tokyo Japan (Unsplash).jpg` |
+| The Kadıköy–Eminönü ferry | Antoloji | CC0 | `Istanbul car ferrie ŞH-Erguvan.jpg` |
+| Süleymaniye Mosque terrace | Jakub Hałun | CC BY 4.0 | `Süleymaniye Mosque, Istanbul, 20260606 0805 1307.jpg` |
+| Miradouro da Senhora do Monte | Sonse | CC BY 2.0 | `Lisbon panoramic view from Miradouro da Senhora do Monte (49648892693).jpg` |
+| Feira da Ladra | Carlos Luis M C da Cruz | Public domain | `Feira da ladra.jpg` |
+| Tram 28 at midday | Yann Cœuru | CC BY 2.0 | `Lisbon - Electrico N°28 (22914497662).jpg` |
+| Tour Montparnasse rooftop | Guilhem Vellut | CC BY 2.0 | `Tour Montparnasse @ Paris (23379715554).jpg` |
+| Marché d'Aligre | Mbzt | CC BY 4.0 | `CF1625 Paris 12e marche Aligre brocante rwk.jpg` |
+| Torre Latinoamericana | Fer9324 | CC BY 4.0 | `Torre Latinoamericana de lejos.jpg` |
+| Fushimi Inari before seven | Balon Greyjoy | CC0 | `20181110 Fushimi Inari Torii 12.jpg` |
+| Roosevelt Island Tramway | Reinhard Dietrich | CC0 | `Roosevelt Island Tramway 1.jpg` |
+| Assistens Cemetery | Thue | Public domain | `Assistens Kirkegård 2.jpg` |
+
+`SPOT_PHOTO_CREDITS` in `src/data/credits.ts` is keyed by the bundled asset URL rather than by spot
+id, so inserting a spot cannot shift a credit onto the wrong photograph. The credits render as one
+line under the Spots section on the city page.
+
 ## Adding a city
 
 Keep the rule: **CC0, public domain, or CC BY only.** No share-alike, no non-commercial, no

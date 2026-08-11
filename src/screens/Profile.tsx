@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { CityCard } from "../components/CityCard";
 import { FavouritesPicker } from "../components/FavouritesPicker";
-import { Stars } from "../components/Stars";
+import { RateCity } from "../components/RateCity";
 import { cityById, requireCity } from "../data/cities";
 import { ratingOf, visitOrdinals } from "../lib/ranking";
 import { useLog } from "../state/LogContext";
@@ -39,6 +39,7 @@ export function Profile() {
               to={`/city/${city!.id}`}
               rating={ratingOf(log, city!.id)}
               plain
+              stars={<RateCity city={city!} size={13} />}
             />
           ))}
           {Array.from({ length: emptySlots }).map((_, index) => (
@@ -59,7 +60,13 @@ export function Profile() {
               const nth = ordinals[visit.id] ?? 1;
               return (
                 <div className="recent-item" key={visit.id}>
-                  <CityCard city={city} to={`/city/${city.id}`} rating={ratingOf(log, city.id)} plain />
+                  <CityCard
+                    city={city}
+                    to={`/city/${city.id}`}
+                    rating={ratingOf(log, city.id)}
+                    plain
+                    stars={<RateCity city={city} size={13} />}
+                  />
                   <span className="recent-when">
                     {visit.when}
                     {nth > 1 && <em> · ↻ {nth}</em>}
@@ -100,7 +107,7 @@ export function Profile() {
             return (
               <li key={visit.id}>
                 <Link to={`/city/${city.id}`}>{city.name}</Link>
-                <Stars value={ratingOf(log, city.id)} />
+                <RateCity city={city} size={13} />
               </li>
             );
           })}

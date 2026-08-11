@@ -21,10 +21,17 @@ interface CityCardProps {
   onEdit?: () => void;
   /**
    * Drops the greyed-out treatment and the "Not been" label. Used on the
-   * Departures board, where nowhere has been visited — saying so on every card
+   * Departures board, where nowhere has been visited. Saying so on every card
    * is noise, and draining the colour makes a wishlist look joyless.
    */
   plain?: boolean;
+  /**
+   * Replaces the star readout, so a screen can hand in an editable row instead.
+   * Passed in rather than imported, because the editable row opens the
+   * comparison flow, and the flow renders these cards: importing it here would
+   * close the loop.
+   */
+  stars?: ReactNode;
 }
 
 /**
@@ -45,6 +52,7 @@ export function CityCard({
   wishMode = "toggle",
   onEdit,
   plain,
+  stars,
 }: CityCardProps) {
   const removing = wishMode === "remove";
   const wrap = (children: ReactNode, className?: string) =>
@@ -96,7 +104,9 @@ export function CityCard({
           <div className="cname">{city.name}</div>
           <div className="cmeta">
             <span className="ccountry">{city.cc}</span>
-            {rating !== null ? (
+            {stars ? (
+              stars
+            ) : rating !== null ? (
               <Stars value={rating} />
             ) : plain ? (
               <span className="ccountry">{city.region}</span>

@@ -1,8 +1,8 @@
 import { Fragment } from "react";
 import { Link } from "react-router-dom";
-import { Stars } from "../components/Stars";
+import { RateCity } from "../components/RateCity";
 import { requireCity } from "../data/cities";
-import { ratingOf, visitOrdinals } from "../lib/ranking";
+import { visitOrdinals } from "../lib/ranking";
 import { useLog } from "../state/LogContext";
 import type { Visit } from "../types";
 
@@ -22,7 +22,7 @@ export function Passport() {
     <section className="screen">
       <h2>Every visit, stamped in order</h2>
       <p className="lede">
-        A city can appear here more than once. That is the whole point of the passport — you rate the
+        A city can appear here more than once. That is the whole point of the passport: you rate the
         city, but you stamp the trip.
       </p>
 
@@ -45,7 +45,7 @@ export function Passport() {
                   <small>{city.country}</small>
                 </span>
                 <span className="again">{nth > 1 ? `↻ visit ${nth}` : ""}</span>
-                <Stars value={ratingOf(log, city.id)} />
+                <RateCity city={city} size={15} />
               </Link>
             );
           })}

@@ -429,6 +429,33 @@ h2 {
   height: 0;
 }
 
+/* The editable row. Same geometry as the readout, so the only difference you
+   should notice is that it answers the pointer. */
+.rate-inline {
+  cursor: pointer;
+}
+
+/* Chrome paints its own ring on plain :focus for a tabbable SVG, which meant a
+   black box around the stars after every click. Dropped, then given back to
+   the keyboard, where a focus ring is the only way to see where you are. */
+.rate-inline:focus {
+  outline: none;
+}
+
+.rate-inline:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+/* Wraps the editable row wherever it sits inside a link or a card row, and
+   keeps the star's click from reaching whatever surrounds it. */
+.rate-cell {
+  display: inline-flex;
+  align-items: center;
+  flex: none;
+}
+
 /* ----------------------------------------------------------- filters -- */
 
 /* A row of dropdowns that name themselves, so the bar reads as a sentence
@@ -1363,11 +1390,15 @@ select option {
 }
 
 .spot-photo {
-  width: 62px;
+  width: 84px;
   aspect-ratio: 1/1;
   object-fit: cover;
   border-radius: 2px;
   flex: none;
+}
+
+.spot-credits {
+  margin-top: 14px;
 }
 
 .spot-body {

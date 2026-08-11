@@ -1,7 +1,9 @@
+import { Fragment } from "react";
+import { SPOT_PHOTO_CREDITS, commonsUrl } from "../data/credits";
 import { linkLabel } from "../lib/spots";
 import { useSpots } from "../state/SpotsContext";
 import { SPOT_CATEGORIES } from "../types";
-import type { CityId } from "../types";
+import type { CityId, Spot } from "../types";
 
 /** Grouped by category, because that is how you'd ask for one. */
 export function SpotList({ city }: { city: CityId }) {
@@ -13,40 +15,86 @@ export function SpotList({ city }: { city: CityId }) {
   }
 
   return (
-    <div className="spot-groups">
-      {SPOT_CATEGORIES.map((category) => {
-        const inCategory = spots.filter((spot) => spot.category === category);
-        if (inCategory.length === 0) return null;
+    <>
+      <div className="spot-groups">
+        {SPOT_CATEGORIES.map((category) => {
+          const inCategory = spots.filter((spot) => spot.category === category);
+          if (inCategory.length === 0) return null;
 
-        return (
-          <div className="spot-group" key={category}>
-            <p className={category === "Skip it" ? "spot-cat warn" : "spot-cat"}>{category}</p>
-            <ul className="spot-list">
-              {inCategory.map((spot) => (
-                <li key={spot.id}>
-                  {spot.photo && <img className="spot-photo" src={spot.photo} alt="" loading="lazy" />}
-                  <div className="spot-body">
-                    <b>{spot.name}</b>
-                    {spot.note && <p>{spot.note}</p>}
-                    {spot.url && (
-                      <a href={spot.url} target="_blank" rel="noreferrer noopener" className="spot-link">
-                        {linkLabel(spot.url)} ↗
-                      </a>
-                    )}
-                  </div>
-                  <button
-                    className="ghost spot-remove"
-                    onClick={() => remove(spot.id)}
-                    aria-label={`Remove ${spot.name}`}
-                  >
-                    ✕
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </div>
-        );
-      })}
-    </div>
+          return (
+            <div className="spot-group" key={category}>
+              <p className={category === "Skip it" ? "spot-cat warn" : "spot-cat"}>{category}</p>
+              <ul className="spot-list">
+                {inCategory.map((spot) => (
+                  <li key={spot.id}>
+                    {spot.photo && <img className="spot-photo" src={spot.photo} alt="" loading="lazy" />}
+                    <div className="spot-body">
+                      <b>{spot.name}</b>
+                      {spot.note && <p>{spot.note}</p>}
+                      {spot.url && (
+                        <a href={spot.url} target="_blank" rel="noreferrer noopener" className="spot-link">
+                          {linkLabel(spot.url)} ↗
+                        </a>
+                      )}
+                    </div>
+                    <button
+                      className="ghost spot-remove"
+                      onClick={() => remove(spot.id)}
+                      aria-label={`Remove ${spot.name}`}
+                    >
+                      ✕
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          );
+        })}
+      </div>
+
+      <SpotPhotoCredits spots={spots} />
+    </>
+  );
+}
+
+/**
+ * One line for the whole section rather than a caption per thumbnail, which at
+ * 84px would be several times longer than the photo is wide. Same obligation as
+ * the city photo: CC BY has to name the photographer to whoever is looking.
+ */
+function SpotPhotoCredits({ spots }: { spots: Spot[] }) {
+  const seen = new Set<string>();
+  const credits = [];
+
+  for (const spot of spots) {
+    const credit = spot.photo ? SPOT_PHOTO_CREDITS[spot.photo] : undefined;
+    if (!credit || seen.has(credit.file)) continue;
+    seen.add(credit.file);
+    credits.push(credit);
+  }
+
+  if (credits.length === 0) return null;
+
+  return (
+    <p className="photo-credit spot-credits">
+      Spot photos{" "}
+      {credits.map((credit, index) => (
+        <Fragment key={credit.file}>
+          {index > 0 && " · "}
+          <a href={commonsUrl(credit.file)} target="_blank" rel="noreferrer noopener">
+            {credit.author}
+          </a>{" ("}
+          {credit.licenceUrl ? (
+            <a href={credit.licenceUrl} target="_blank" rel="noreferrer noopener">
+              {credit.licence}
+            </a>
+          ) : (
+            credit.licence
+          )}
+          {")"}
+        </Fragment>
+      ))}
+      , cropped
+    </p>
   );
 }

@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { PhotoCreditLine } from "../components/PhotoCreditLine";
-import { RateFlow } from "../components/RateFlow";
-import { RateInline } from "../components/RateInline";
+import { RateCity } from "../components/RateCity";
 import { SpotForm } from "../components/SpotForm";
 import { SpotList } from "../components/SpotList";
 import { Stamp } from "../components/Stamp";
@@ -16,7 +15,6 @@ export function CityPage() {
   const { id = "" } = useParams();
   const { log, toggleWishlist } = useLog();
   const [addingSpot, setAddingSpot] = useState(false);
-  const [pending, setPending] = useState<number | null>(null);
   const city = cityById(id);
 
   if (!city) {
@@ -44,7 +42,12 @@ export function CityPage() {
 
       <div className="city-top">
         <div>
-          <Stamp city={city} rating={rating} date={visits[0]?.when.toUpperCase()} />
+          <Stamp
+            city={city}
+            rating={rating}
+            date={visits[0]?.when.toUpperCase()}
+            stars={<RateCity city={city} size={14} label={`Rate ${city.name} on the stamp`} />}
+          />
           <PhotoCreditLine city={city.id} />
         </div>
         <div>
@@ -57,17 +60,13 @@ export function CityPage() {
               <div className="pstat left">
                 {/* Rateable straight from here, so a city can be scored without
                     logging a trip first. */}
-                <RateInline
-                  value={null}
-                  onPick={setPending}
-                  label={`Rate ${city.name}`}
-                />
+                <RateCity city={city} />
                 <span>Tap to rate</span>
               </div>
             ) : (
               <>
                 <div className="pstat left">
-                  <RateInline value={rating} onPick={setPending} label={`Change your rating of ${city.name}`} />
+                  <RateCity city={city} />
                   <span>Your rating · tap to change</span>
                 </div>
                 <div className="pstat left">
@@ -104,15 +103,11 @@ export function CityPage() {
         </button>
       </div>
       <p className="lede">
-        The things you'd actually tell someone about {city.name} — with a link or a photo if you have one.
+        The things you'd actually tell someone about {city.name}, with a link or a photo if you have one.
       </p>
       <SpotList city={city.id} />
 
       {addingSpot && <SpotForm city={city} onClose={() => setAddingSpot(false)} />}
-
-      {pending !== null && (
-        <RateFlow city={city} rating={pending} onDone={() => setPending(null)} />
-      )}
 
       <div className="two-col" style={{ marginTop: "36px" }}>
         <div>
