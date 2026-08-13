@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { ChangeEvent } from "react";
-import { downscaleImage } from "../lib/spots";
+import { downscaleImage } from "../lib/images";
 import { useProfile } from "../state/ProfileContext";
 import { Modal } from "./Modal";
 

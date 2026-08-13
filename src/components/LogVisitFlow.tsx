@@ -1,100 +1,160 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import type { KeyboardEvent } from "react";
+import type { KeyboardEvent as ReactKeyboardEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { CITIES, requireCity } from "../data/cities";
-import { nextOpponent, questionsLeft, rankOf, ratingOf, recordAnswer, visitsFor } from "../lib/ranking";
+import { MONTH_NAMES, addDays, addMonths, daysInMonth, formatDate, startOfDay } from "../lib/dates";
+import {
+  nextOpponent,
+  questionsLeft,
+  rankOf,
+  ratingOf,
+  recordAnswer,
+  settleEarly,
+  visitsFor,
+} from "../lib/ranking";
 import { inlineCompletion, searchCities } from "../lib/search";
+import { StorageFullError } from "../lib/quota";
 import { useLog } from "../state/LogContext";
-import type { CityId, LogState, Placement } from "../types";
+import { useSpots } from "../state/SpotsContext";
+import { SPOT_CATEGORIES } from "../types";
+import type { CityId, LogState, Placement, SpotCategory } from "../types";
 import { CityCard } from "./CityCard";
+import { CityPhoto } from "./CityPhoto";
 import { Modal } from "./Modal";
 import { Stamp } from "./Stamp";
 import { StarPicker } from "./StarPicker";
 import { Stars } from "./Stars";
 
-const MONTHS = [
-  "Aug 2026",
-  "Jul 2026",
-  "Jun 2026",
-  "May 2026",
-  "Apr 2026",
-  "Mar 2026",
-  "Feb 2026",
-  "Jan 2026",
-];
-
+/**
+ * Two screens, not four: find the city, then say everything about the trip on
+ * one panel. The comparisons that follow are the app placing the rating, not
+ * another question about the visit.
+ */
 type Step =
   | { name: "city" }
-  | { name: "when"; city: CityId }
-  | { name: "rate"; city: CityId; when: string; day: string }
-  | { name: "duel"; when: string; day: string; scratch: LogState; placement: Placement }
-  | { name: "done"; city: CityId; rating: number; asked: number };
+  | { name: "details"; city: CityId }
+  | {
+      name: "duel";
+      when: string;
+      day: string;
+      scratch: LogState;
+      placement: Placement;
+      /** Every earlier state of the placement, so Back can undo one answer. */
+      past: Placement[];
+      note?: string;
+    }
+  | { name: "done"; city: CityId; rating: number | null; asked: number };
 
 export function LogVisitFlow({ onClose }: { onClose: () => void }) {
   const { log, begin, commitVisit } = useLog();
   const [step, setStep] = useState<Step>({ name: "city" });
   const navigate = useNavigate();
 
-  /** Runs the bracket forward; settles immediately when nothing to compare. */
-  function advance(scratch: LogState, placement: Placement, when: string, day: string) {
-    if (nextOpponent(scratch, placement)) {
-      setStep({ name: "duel", when, day, scratch, placement });
-      return;
-    }
-    commitVisit(placement, { city: placement.cityId, when, day });
-    setStep({ name: "done", city: placement.cityId, rating: placement.rating, asked: placement.asked });
+  function commit(placement: Placement | null, when: string, day: string, note?: string) {
+    const city = placement ? placement.cityId : (step.name === "details" ? step.city : "");
+    commitVisit(placement, { city, when, day, note: note?.trim() || undefined });
+    setStep({
+      name: "done",
+      city,
+      rating: placement?.rating ?? null,
+      asked: placement?.asked ?? 0,
+    });
   }
 
+  /** Runs the bracket forward; settles immediately when nothing to compare. */
+  function advance(
+    scratch: LogState,
+    placement: Placement,
+    when: string,
+    day: string,
+    past: Placement[],
+    note?: string,
+  ) {
+    if (nextOpponent(scratch, placement)) {
+      setStep({ name: "duel", when, day, scratch, placement, past, note });
+      return;
+    }
+    commit(placement, when, day, note);
+  }
+
+  /**
+   * Leaving during the comparisons keeps the visit. By then the city, the date
+   * and the rating are all settled and only the order within that rating is
+   * still open, so the answers given so far decide the slot. Bailing out three
+   * questions in used to throw the whole log away.
+   */
+  function leave() {
+    if (step.name === "duel") {
+      const settled = settleEarly(step.placement);
+      commitVisit(settled, {
+        city: settled.cityId,
+        when: step.when,
+        day: step.day,
+        note: step.note?.trim() || undefined,
+      });
+    }
+    onClose();
+  }
+
+  // A new screen for every question too, so each one animates in and takes
+  // focus rather than the cards swapping underneath the cursor.
+  const stepKey = step.name === "duel" ? `duel-${step.placement.asked}` : step.name;
+
   return (
-    <Modal onClose={onClose} labelledBy="log-title">
-      {step.name === "city" && (
-        <PickCity onPick={(city) => setStep({ name: "when", city })} onClose={onClose} />
-      )}
+    <Modal onClose={leave} labelledBy="log-title" focusKey={stepKey}>
+      <div className="step" key={stepKey}>
+        {step.name === "city" && (
+          <PickCity onPick={(city) => setStep({ name: "details", city })} onClose={leave} />
+        )}
 
-      {step.name === "when" && (
-        <PickWhen
-          city={step.city}
-          onBack={() => setStep({ name: "city" })}
-          onClose={onClose}
-          onPick={(when, day) => setStep({ name: "rate", city: step.city, when, day })}
-        />
-      )}
+        {step.name === "details" && (
+          <Details
+            city={step.city}
+            onBack={() => setStep({ name: "city" })}
+            onClose={leave}
+            onSave={({ when, day, rating, note }) => {
+              if (rating === null) {
+                commit(null, when, day, note);
+                return;
+              }
+              const { state, placement } = begin(step.city, rating);
+              advance(state, placement, when, day, [], note);
+            }}
+          />
+        )}
 
-      {step.name === "rate" && (
-        <PickRating
-          city={step.city}
-          onBack={() => setStep({ name: "when", city: step.city })}
-          onClose={onClose}
-          onPick={(rating) => {
-            const { state, placement } = begin(step.city, rating);
-            advance(state, placement, step.when, step.day);
-          }}
-        />
-      )}
+        {step.name === "duel" && (
+          <Duel
+            step={step}
+            onAnswer={(challengerWon) => {
+              const next = recordAnswer(step.placement, challengerWon);
+              advance(step.scratch, next, step.when, step.day, [...step.past, step.placement], step.note);
+            }}
+            onBack={() => {
+              const previous = step.past[step.past.length - 1];
+              if (previous) {
+                setStep({ ...step, placement: previous, past: step.past.slice(0, -1) });
+              } else {
+                setStep({ name: "details", city: step.placement.cityId });
+              }
+            }}
+            onSkip={() => commit(settleEarly(step.placement), step.when, step.day, step.note)}
+          />
+        )}
 
-      {step.name === "duel" && (
-        <Duel
-          step={step}
-          onAnswer={(challengerWon) => {
-            const next = recordAnswer(step.placement, challengerWon);
-            advance(step.scratch, next, step.when, step.day);
-          }}
-          onClose={onClose}
-        />
-      )}
-
-      {step.name === "done" && (
-        <Done
-          city={step.city}
-          rating={step.rating}
-          asked={step.asked}
-          log={log}
-          onDone={() => {
-            onClose();
-            navigate("/cities");
-          }}
-        />
-      )}
+        {step.name === "done" && (
+          <Done
+            city={step.city}
+            rating={step.rating}
+            asked={step.asked}
+            log={log}
+            onDone={() => {
+              onClose();
+              navigate("/cities");
+            }}
+          />
+        )}
+      </div>
     </Modal>
   );
 }
@@ -107,7 +167,11 @@ function PickCity({ onPick, onClose }: { onPick: (id: CityId) => void; onClose: 
   const [active, setActive] = useState(0);
   const listRef = useRef<HTMLDivElement>(null);
 
-  const matches = useMemo(() => searchCities(CITIES, term), [term]);
+  /* Nothing until you type. An untouched field used to open onto the whole
+     catalogue in alphabetical order, which is a list nobody is reading — and
+     it left Amsterdam highlighted, so Enter logged a trip you hadn't chosen. */
+  const typed = term.trim().length > 0;
+  const matches = useMemo(() => (typed ? searchCities(CITIES, term) : []), [term, typed]);
   const completion = useMemo(() => inlineCompletion(matches, term), [matches, term]);
 
   // The best match is highlighted, so typing another letter has to reset it.
@@ -119,7 +183,7 @@ function PickCity({ onPick, onClose }: { onPick: (id: CityId) => void; onClose: 
     listRef.current?.querySelector<HTMLElement>('[data-active="true"]')?.scrollIntoView({ block: "nearest" });
   }, [active]);
 
-  function onKeyDown(event: KeyboardEvent<HTMLInputElement>) {
+  function onKeyDown(event: ReactKeyboardEvent<HTMLInputElement>) {
     if (event.key === "ArrowDown") {
       event.preventDefault();
       setActive((current) => Math.min(matches.length - 1, current + 1));
@@ -144,7 +208,7 @@ function PickCity({ onPick, onClose }: { onPick: (id: CityId) => void; onClose: 
 
   return (
     <>
-      <h2 id="log-title">Step 1 of 3</h2>
+      <h2 id="log-title">Step 1 of 2</h2>
       <h3>Where did you go?</h3>
       {/* The ghost sits under a transparent input so the two stay in step;
           both use the same font and padding, so the text lines up exactly. */}
@@ -161,6 +225,7 @@ function PickCity({ onPick, onClose }: { onPick: (id: CityId) => void; onClose: 
           role="combobox"
           aria-expanded={matches.length > 0}
           aria-controls="city-matches"
+          aria-activedescendant={matches[active] ? `city-option-${matches[active].city.id}` : undefined}
           aria-autocomplete="both"
           value={term}
           onChange={(event) => setTerm(event.target.value)}
@@ -175,6 +240,7 @@ function PickCity({ onPick, onClose }: { onPick: (id: CityId) => void; onClose: 
           return (
             <button
               key={city.id}
+              id={`city-option-${city.id}`}
               className="option"
               role="option"
               aria-selected={index === active}
@@ -182,7 +248,7 @@ function PickCity({ onPick, onClose }: { onPick: (id: CityId) => void; onClose: 
               onMouseEnter={() => setActive(index)}
               onClick={() => onPick(city.id)}
             >
-              <img src={city.photo} alt="" />
+              <CityPhoto city={city} />
               <span>
                 <b>{at ? highlight(city.name, at) : city.name}</b>
                 <small>{city.country}</small>
@@ -193,7 +259,7 @@ function PickCity({ onPick, onClose }: { onPick: (id: CityId) => void; onClose: 
             </button>
           );
         })}
-        {matches.length === 0 && (
+        {typed && matches.length === 0 && (
           <p className="empty" style={{ padding: "10px" }}>
             No city called “{term.trim()}”. In the real thing, this is where you would add one.
           </p>
@@ -215,71 +281,301 @@ function highlight(name: string, [from, to]: [number, number]) {
   );
 }
 
-function PickWhen({
+interface Saved {
+  when: string;
+  day: string;
+  rating: number | null;
+  note: string;
+}
+
+/**
+ * Everything about the trip on one screen: when you went, how it was, what
+ * you'd say about it, and one place worth remembering. Nothing here is
+ * required — the screen before it already has the only thing that is.
+ */
+function Details({
   city,
-  onPick,
+  onSave,
   onBack,
   onClose,
 }: {
   city: CityId;
-  onPick: (when: string, day: string) => void;
+  onSave: (saved: Saved) => void;
   onBack: () => void;
   onClose: () => void;
 }) {
+  const target = requireCity(city);
+  const { log } = useLog();
+  const { add: addSpot } = useSpots();
+  const today = useMemo(() => startOfDay(new Date()), []);
+
+  const [date, setDate] = useState(today);
+  const [picking, setPicking] = useState(false);
+  const [rating, setRating] = useState<number | null>(ratingOf(log, city));
+  const [note, setNote] = useState("");
+  const [category, setCategory] = useState<SpotCategory>(SPOT_CATEGORIES[0]);
+  const [spot, setSpot] = useState("");
+  const [error, setError] = useState<string | null>(null);
+
+  function save() {
+    // Spots are a separate store with its own quota; a full one shouldn't cost
+    // you the visit, so it is written first and only its failure reported.
+    if (spot.trim()) {
+      try {
+        addSpot({ city, category, name: spot.trim() });
+      } catch (caught) {
+        setError(caught instanceof StorageFullError ? caught.message : "That spot could not be saved.");
+        return;
+      }
+    }
+    onSave({
+      when: `${MONTH_NAMES[date.getMonth()]} ${date.getFullYear()}`,
+      day: String(date.getDate()).padStart(2, "0"),
+      rating,
+      note,
+    });
+  }
+
   return (
     <>
-      <h2 id="log-title">Step 2 of 3</h2>
-      <h3>When were you in {requireCity(city).name}?</h3>
-      <p className="hint">
-        A visit, not a city. Go back next year and you log it again. The rating stays yours to change.
-      </p>
-      <div className="chips">
-        {MONTHS.map((month) => (
-          <button key={month} className="chip" onClick={() => onPick(month, dayOf())}>
-            {month}
+      <h2 id="log-title">Step 2 of 2</h2>
+      <h3>{target.name}</h3>
+
+      <div className="log-top">
+        <span className="log-shot">
+          <CityPhoto city={target} alt={target.name} />
+        </span>
+        <div className="log-when">
+          <span className="field-label">Visited on</span>
+          {/* A field you open, not a screen you pass through. */}
+          <button
+            className={picking ? "date-btn on" : "date-btn"}
+            aria-expanded={picking}
+            data-autofocus
+            onClick={() => setPicking((open) => !open)}
+          >
+            {formatDate(date)}
           </button>
-        ))}
-        <button className="chip" onClick={() => onPick("Before 2026", dayOf())}>
-          Earlier
-        </button>
+        </div>
       </div>
-      <Foot onBack={onBack} onClose={onClose} />
+
+      {picking && (
+        <Calendar
+          value={date}
+          today={today}
+          onPick={(next) => {
+            setDate(next);
+            setPicking(false);
+          }}
+        />
+      )}
+
+      <div className="log-field">
+        <span className="field-label">How was it?</span>
+        <StarPicker value={rating ?? 0} initial={rating ?? 0} onPick={setRating} />
+      </div>
+
+      <label className="log-field">
+        <span className="field-label">Your note</span>
+        <textarea
+          className="search note-box"
+          rows={2}
+          placeholder={`What was ${target.name} like?`}
+          value={note}
+          onChange={(event) => setNote(event.target.value)}
+        />
+      </label>
+
+      <div className="log-field">
+        <span className="field-label">And a spot worth remembering</span>
+        <div className="chips">
+          {SPOT_CATEGORIES.map((option) => (
+            <button
+              key={option}
+              className={option === category ? "chip on" : "chip"}
+              aria-pressed={option === category}
+              onClick={() => setCategory(option)}
+            >
+              {option}
+            </button>
+          ))}
+        </div>
+        <input
+          className="search"
+          value={spot}
+          placeholder="The one you would actually mention"
+          aria-label="Spot name"
+          onChange={(event) => setSpot(event.target.value)}
+        />
+      </div>
+
+      {error && <p className="field-error block">{error}</p>}
+
+      <div className="sheet-foot">
+        <button className="ghost" onClick={onBack}>
+          ← Back
+        </button>
+        <span className="foot-pair">
+          <button className="ghost" onClick={onClose}>
+            Cancel
+          </button>
+          <button className="log-btn" onClick={save}>
+            Save
+          </button>
+        </span>
+      </div>
     </>
   );
 }
 
-function PickRating({
-  city,
+/** The month grid. Opened from the date field rather than owning a step. */
+function Calendar({
+  value,
+  today,
   onPick,
-  onBack,
-  onClose,
 }: {
-  city: CityId;
-  onPick: (rating: number) => void;
-  onBack: () => void;
-  onClose: () => void;
+  value: Date;
+  today: Date;
+  onPick: (date: Date) => void;
 }) {
+  const [cursor, setCursor] = useState(value);
+  const gridRef = useRef<HTMLDivElement>(null);
+  // Set by the arrow keys, read after the move. Asking where the focus is
+  // afterwards doesn't work: crossing into a month whose later days are in the
+  // future disables the button that had it, and the browser blurs a disabled
+  // element - so by then the focus is on <body> and the trail is cold.
+  const chasing = useRef(false);
+
+  // Arrow keys move the cursor in state; the focus has to follow it, or the
+  // ring stays on the day you started from. Paging with the mouse leaves the
+  // flag clear, so it doesn't yank focus off the arrow you just clicked.
+  useEffect(() => {
+    if (!chasing.current) return;
+    chasing.current = false;
+    gridRef.current?.querySelector<HTMLElement>("[data-cursor]")?.focus();
+  }, [cursor]);
+
+  const year = cursor.getFullYear();
+  const month = cursor.getMonth();
+  const length = daysInMonth(year, month);
+  // Monday first: getDay() is Sunday-based, so shift it.
+  const blanks = (new Date(year, month, 1).getDay() + 6) % 7;
+  const atCurrentMonth = year === today.getFullYear() && month === today.getMonth();
+
+  /** Moves the cursor, refusing to leave the past. */
+  function moveTo(next: Date) {
+    setCursor(next > today ? today : next);
+  }
+
+  function onKeyDown(event: ReactKeyboardEvent<HTMLDivElement>) {
+    const steps: Record<string, number> = { ArrowLeft: -1, ArrowRight: 1, ArrowUp: -7, ArrowDown: 7 };
+    const step = steps[event.key];
+    if (!step) return;
+    event.preventDefault();
+    chasing.current = true;
+    // The grid re-renders around the new cursor, so this walks into the
+    // previous or next month at the edges without any special casing.
+    moveTo(addDays(cursor, step));
+  }
+
   return (
-    <>
-      <h2 id="log-title">Step 3 of 3</h2>
-      <h3>How was {requireCity(city).name}?</h3>
-      <p className="hint">Half stars count. Click the left half of a star for a half.</p>
-      <StarPicker onPick={onPick} />
-      <Foot onBack={onBack} onClose={onClose} />
-    </>
+    <div className="cal">
+      <div className="cal-head">
+        <button className="cal-step" aria-label="Previous year" onClick={() => moveTo(addMonths(cursor, -12))}>
+          «
+        </button>
+        <button className="cal-step" aria-label="Previous month" onClick={() => moveTo(addMonths(cursor, -1))}>
+          ‹
+        </button>
+        <span className="cal-title" aria-live="polite">
+          {MONTH_NAMES[month]} {year}
+        </span>
+        <button
+          className="cal-step"
+          aria-label="Next month"
+          disabled={atCurrentMonth}
+          onClick={() => moveTo(addMonths(cursor, 1))}
+        >
+          ›
+        </button>
+        <button
+          className="cal-step"
+          aria-label="Next year"
+          disabled={atCurrentMonth}
+          onClick={() => moveTo(addMonths(cursor, 12))}
+        >
+          »
+        </button>
+      </div>
+
+      {/* One tab stop for the whole grid, arrow keys inside it — tabbing
+          through thirty-one days to reach the one you want is not a date
+          picker, it's a punishment. */}
+      <div className="cal-grid" role="grid" aria-label="Pick a date" ref={gridRef} onKeyDown={onKeyDown}>
+        {WEEKDAYS.map((day, index) => (
+          <span key={index} className="cal-dow" aria-hidden="true">
+            {day}
+          </span>
+        ))}
+        {Array.from({ length: blanks }, (_, index) => (
+          <span key={`blank${index}`} />
+        ))}
+        {Array.from({ length }, (_, index) => {
+          const day = index + 1;
+          const date = new Date(year, month, day);
+          const future = date > today;
+          const chosen = date.getTime() === value.getTime();
+          const onCursor = day === cursor.getDate();
+          return (
+            <button
+              key={day}
+              className={chosen ? "cal-day today" : "cal-day"}
+              disabled={future}
+              // Only the cursor is tabbable, so Tab leaves the grid rather
+              // than walking it. Arrow keys move within.
+              tabIndex={onCursor ? 0 : -1}
+              data-cursor={onCursor ? true : undefined}
+              aria-label={`${day} ${MONTH_NAMES[month]} ${year}`}
+              onClick={() => onPick(date)}
+            >
+              {day}
+            </button>
+          );
+        })}
+      </div>
+    </div>
   );
 }
 
 function Duel({
   step,
   onAnswer,
-  onClose,
+  onBack,
+  onSkip,
 }: {
   step: Extract<Step, { name: "duel" }>;
   onAnswer: (challengerWon: boolean) => void;
-  onClose: () => void;
+  onBack: () => void;
+  onSkip: () => void;
 }) {
   const opponentId = nextOpponent(step.scratch, step.placement);
+
+  // Left and right pick a side. The rest of the flow is keyboard-driven, so
+  // reaching for the mouse only here was the one break in the run.
+  useEffect(() => {
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key === "ArrowLeft") {
+        event.preventDefault();
+        onAnswer(true);
+      } else if (event.key === "ArrowRight") {
+        event.preventDefault();
+        onAnswer(false);
+      }
+    }
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [onAnswer]);
+
   if (!opponentId) return null;
 
   const challenger = requireCity(step.placement.cityId);
@@ -288,8 +584,16 @@ function Duel({
 
   return (
     <>
-      <h2 id="log-title">Same rating</h2>
-      <h3>You gave both {step.placement.rating} stars. Which was better?</h3>
+      {/* Still step 3: the comparisons are how the rating is filed, not a
+          fourth thing being asked of you. */}
+      <h2 id="log-title">Step 3 of 3 · Placing it</h2>
+      <h3>
+        {challenger.name} or {opponent.name}?
+      </h3>
+      <p className="hint">
+        You gave both {step.placement.rating} stars. Which did you prefer? Leave whenever — the visit
+        is saved either way.
+      </p>
       <div className="duel">
         <button onClick={() => onAnswer(true)} aria-label={`${challenger.name} was better`}>
           {/* The challenger already has this rating — it just isn't in the log yet. */}
@@ -301,9 +605,16 @@ function Duel({
         </button>
       </div>
       <span className="progress">
-        Question {step.placement.asked + 1} · about {left} left
+        Question {step.placement.asked + 1} · about {left} left · ← / → to choose
       </span>
-      <Foot onClose={onClose} />
+      <div className="sheet-foot">
+        <button className="ghost" onClick={onBack}>
+          ← Back
+        </button>
+        <button className="ghost" onClick={onSkip}>
+          Skip the rest →
+        </button>
+      </div>
     </>
   );
 }
@@ -316,7 +627,8 @@ function Done({
   onDone,
 }: {
   city: CityId;
-  rating: number;
+  /** Null when the visit was logged without one; the stamp goes unfranked. */
+  rating: number | null;
   asked: number;
   log: LogState;
   onDone: () => void;
@@ -329,11 +641,17 @@ function Done({
     <div className="result">
       <Stamp city={target} rating={rating} date={visits[0]?.when.toUpperCase()} />
       <p className="verdict-line">
-        {target.name} is your #{rank.pos}
+        {rating === null ? `${target.name}, stamped` : `${target.name} is your #${rank.pos}`}
       </p>
       <p>
-        {rating} stars, {rank.pos} of {rank.total} cities
-        {asked > 0 && `, settled in ${asked} ${asked === 1 ? "question" : "questions"}`}.
+        {rating === null ? (
+          `${visits.length} ${visits.length === 1 ? "visit" : "visits"} logged. Rate it whenever you like.`
+        ) : (
+          <>
+            {rating} stars, {rank.pos} of {rank.total} cities
+            {asked > 0 && `, settled in ${asked} ${asked === 1 ? "question" : "questions"}`}.
+          </>
+        )}
       </p>
       <button className="log-btn" style={{ width: "100%" }} onClick={onDone}>
         See your cities
@@ -359,7 +677,7 @@ function Foot({ onBack, onClose }: { onBack?: () => void; onClose: () => void })
   );
 }
 
-/** Placeholder day-of-month until the flow takes a real date. */
-function dayOf(): string {
-  return String(1 + Math.floor(Math.random() * 27)).padStart(2, "0");
-}
+/* --------------------------------------------------------------- when --- */
+
+/** Monday first. Repeated letters are fine here; the cells carry a full label. */
+const WEEKDAYS = ["M", "T", "W", "T", "F", "S", "S"];

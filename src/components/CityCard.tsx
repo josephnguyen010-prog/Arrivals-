@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import type { ReactNode } from "react";
 import type { City } from "../types";
+import { CityPhoto } from "./CityPhoto";
 import { Stars } from "./Stars";
 
 interface CityCardProps {
@@ -67,7 +68,7 @@ export function CityCard({
   return (
     <div className={rating === null && !plain ? "card unvisited" : "card"}>
       <div className="shot">
-        {wrap(<img src={city.photo} alt={city.name} loading="lazy" />, "shot-link")}
+        {wrap(<CityPhoto city={city} alt={city.name} loading="lazy" />, "shot-link")}
         {visits > 1 && <span className="revisits">↻ {visits}</span>}
 
         {onEdit && (
@@ -103,7 +104,7 @@ export function CityCard({
         <>
           <div className="cname">{city.name}</div>
           <div className="cmeta">
-            <span className="ccountry">{city.cc}</span>
+            <span className="ccountry">{city.country}</span>
             {stars ? (
               stars
             ) : rating !== null ? (

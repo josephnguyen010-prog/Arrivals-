@@ -1,41 +1,181 @@
-import { CityCard } from "../components/CityCard";
+import { useMemo } from "react";
+import { Link } from "react-router-dom";
+import { CityPhoto } from "../components/CityPhoto";
 import { Stars } from "../components/Stars";
 import { requireCity } from "../data/cities";
 import { FEED } from "../data/seed";
+import { MONTH_NAMES } from "../lib/dates";
+import { isWished, ratingOf } from "../lib/ranking";
+import { useLog } from "../state/LogContext";
+import { useProfile } from "../state/ProfileContext";
+import type { FeedItem, Visit } from "../types";
 
+/**
+ * Two weights of entry, in one column, newest first.
+ *
+ * A friend's trip is the loud one: they wrote something, so their words are
+ * the body of the entry and you can read it without opening anything. Your own
+ * stamps are the quiet one — a line, because you already know what you did and
+ * the feed is mostly for what other people did.
+ *
+ * Opening a friend's entry opens *their* trip, not the city. The city page is
+ * your record of somewhere you have been, and routing the feed at it made
+ * every city a friend mentioned arrive dressed as one of yours.
+ */
 export function Activity() {
+  const { log } = useLog();
+  const { profile, initials } = useProfile();
+
+  const entries = useMemo(() => {
+    const theirs = FEED.map((item) => ({ kind: "friend" as const, age: agoInDays(item.when), item }));
+    const yours = log.visits.map((visit) => ({
+      kind: "you" as const,
+      age: visitAgeInDays(visit),
+      visit,
+    }));
+    // Oldest last. Ties keep a friend's entry above your own line, which reads
+    // better than a stamp splitting two things somebody wrote.
+    return [...theirs, ...yours].sort((a, b) => a.age - b.age || (a.kind === "friend" ? -1 : 1));
+  }, [log.visits]);
+
   return (
     <section className="screen">
       <h2>From people you follow</h2>
+      <p className="lede">
+        What they said about where they went, and your own stamps in among it.
+      </p>
+
       <div className="feed">
-        {FEED.map((item) => {
-          const city = requireCity(item.city);
-          return (
-            <article className="entry" key={item.id}>
-              <CityCard city={city} to={`/city/${city.id}`} rating={item.rating} />
-              <div>
-                <div className="who-line">
-                  <b>{item.who}</b>
-                  <span className="handle">{item.handle}</span>
-                  <span className="when">{item.when} ago</span>
-                </div>
-                <h3>
-                  {city.name}
-                  <Stars value={item.rating} size={15} />
-                </h3>
-                <p>{item.note}</p>
-                <div className="tags">
-                  {item.tags.map((tag) => (
-                    <span className="tag" key={tag}>
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            </article>
-          );
-        })}
+        {entries.map((entry) =>
+          entry.kind === "friend" ? (
+            <FriendEntry key={entry.item.id} item={entry.item} />
+          ) : (
+            <YourLine key={entry.visit.id} visit={entry.visit} you={profile.name} initials={initials} />
+          ),
+        )}
       </div>
     </section>
   );
+}
+
+/** Somebody else's trip, with what they wrote about the city. */
+function FriendEntry({ item }: { item: FeedItem }) {
+  const { log, toggleWishlist } = useLog();
+  const city = requireCity(item.city);
+  const wished = isWished(log, city.id);
+  const to = `/activity/${item.id}`;
+
+  return (
+    <article className="fentry">
+      <span className="favatar" aria-hidden="true">
+        {initialsOf(item.who)}
+      </span>
+
+      <Link className="fshot" to={to} tabIndex={-1} aria-hidden="true">
+        <CityPhoto city={city} loading="lazy" />
+      </Link>
+
+      <div className="fbody">
+        <p className="fwho">
+          <b>{item.who}</b>
+          <span className="handle">{item.handle}</span>
+          <span className="fverb">{verbFor(item)}</span>
+          <span className="when">{item.when} ago</span>
+        </p>
+
+        <h3 className="ftitle">
+          <Link to={to}>{city.name}</Link>
+          <small>{city.country}</small>
+        </h3>
+
+        <Stars value={item.rating} size={15} />
+
+        {/* Their words, in full. This is the entry — you shouldn't have to open
+            anything to find out what somebody thought. */}
+        <p className="fsay">{item.note}</p>
+
+        <div className="tags">
+          {item.tags.map((tag) => (
+            <span className="tag" key={tag}>
+              {tag}
+            </span>
+          ))}
+        </div>
+
+        {/* The one thing their trip can do to your account. */}
+        <button
+          className={wished ? "fwish on" : "fwish"}
+          aria-pressed={wished}
+          onClick={() => toggleWishlist(city.id)}
+        >
+          {wished ? `✓ ${city.name} is on your Departures board` : `+ Add ${city.name} to Departures`}
+        </button>
+      </div>
+    </article>
+  );
+}
+
+/** One of your own stamps: a line, not an entry. */
+function YourLine({ visit, you, initials }: { visit: Visit; you: string; initials: string }) {
+  const { log } = useLog();
+  const city = requireCity(visit.city);
+  const rating = ratingOf(log, city.id);
+
+  return (
+    <Link className="fline" to={`/city/${city.id}`}>
+      <span className="favatar small" aria-hidden="true">
+        {initials}
+      </span>
+      <span className="ftext">
+        <b>{you.split(" ")[0]}</b> stamped <b>{city.name}</b>
+        {visit.note ? ` — ${visit.note}` : ""}
+      </span>
+      {rating !== null && <Stars value={rating} size={13} />}
+      <span className="when">
+        {visit.day} {visit.when}
+      </span>
+    </Link>
+  );
+}
+
+/* --------------------------------------------------------------- when --- */
+
+/**
+ * The feed writes ages the way a person would — "2d", "3w", "5mo" — so they
+ * sort against real dates only once they're in the same unit. Anything
+ * unparseable sinks to the bottom rather than jumping to the top.
+ */
+function agoInDays(when: string): number {
+  const match = /^(\d+)\s*(d|w|mo|y)$/.exec(when.trim());
+  if (!match) return Number.MAX_SAFE_INTEGER;
+  const size = Number(match[1]);
+  const unit = { d: 1, w: 7, mo: 30, y: 365 }[match[2] as "d" | "w" | "mo" | "y"];
+  return size * unit;
+}
+
+/** A visit stores "12" and "Mar 2026". Undatable ones sink, as above. */
+function visitAgeInDays(visit: Visit): number {
+  const [name, year] = visit.when.split(" ");
+  const month = MONTH_NAMES.indexOf(name);
+  if (month === -1 || !/^\d{4}$/.test(year ?? "")) return Number.MAX_SAFE_INTEGER;
+  const day = Number(visit.day) || 1;
+  const then = new Date(Number(year), month, day);
+  return Math.max(0, Math.round((Date.now() - then.getTime()) / 86_400_000));
+}
+
+/** "Mai Tran" → "MT". One letter is fine; the chip is a marker, not a name. */
+function initialsOf(name: string): string {
+  return name
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase() ?? "")
+    .join("");
+}
+
+/** What they did, from the tag the trip already carries. */
+function verbFor(item: FeedItem): string {
+  const first = item.tags[0]?.toLowerCase() ?? "";
+  if (first === "first visit") return "visited";
+  if (first.endsWith("visit")) return "went back to";
+  return "was in";
 }

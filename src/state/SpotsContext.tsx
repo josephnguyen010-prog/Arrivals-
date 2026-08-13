@@ -8,6 +8,8 @@ interface SpotsContextValue {
   forCity: (city: CityId) => Spot[];
   /** Throws StorageFullError if the photo will not fit. */
   add: (spot: Omit<Spot, "id">) => void;
+  /** Replaces everything but the id. Throws StorageFullError like `add`. */
+  update: (id: string, spot: Omit<Spot, "id">) => void;
   remove: (id: string) => void;
 }
 
@@ -24,6 +26,15 @@ export function SpotsProvider({ children }: { children: ReactNode }) {
     setSpots(next);
   }, [spots]);
 
+  const update = useCallback(
+    (id: string, spot: Omit<Spot, "id">) => {
+      const next = spots.map((current) => (current.id === id ? { ...spot, id } : current));
+      saveSpots(next);
+      setSpots(next);
+    },
+    [spots],
+  );
+
   const remove = useCallback((id: string) => {
     const next = spots.filter((spot) => spot.id !== id);
     saveSpots(next);
@@ -31,8 +42,8 @@ export function SpotsProvider({ children }: { children: ReactNode }) {
   }, [spots]);
 
   const value = useMemo<SpotsContextValue>(
-    () => ({ spots, forCity: (city) => spotsForCity(spots, city), add, remove }),
-    [spots, add, remove],
+    () => ({ spots, forCity: (city) => spotsForCity(spots, city), add, update, remove }),
+    [spots, add, update, remove],
   );
 
   return <SpotsContext.Provider value={value}>{children}</SpotsContext.Provider>;

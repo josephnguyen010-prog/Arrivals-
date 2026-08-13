@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { CityCard } from "../components/CityCard";
+import { CityPhoto } from "../components/CityPhoto";
 import { FavouritesPicker } from "../components/FavouritesPicker";
 import { RateCity } from "../components/RateCity";
 import { cityById, requireCity } from "../data/cities";
@@ -90,7 +91,7 @@ export function Profile() {
         ) : (
           <Link className="side-strip" to="/departures" aria-label="Open Departures">
             {log.wishlist.slice(0, DEPARTURES_PREVIEW).map((id) => (
-              <img key={id} src={requireCity(id).photo} alt="" loading="lazy" />
+              <CityPhoto key={id} city={requireCity(id)} loading="lazy" />
             ))}
           </Link>
         )}

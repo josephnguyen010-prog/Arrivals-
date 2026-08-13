@@ -1,13 +1,14 @@
 import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
+import { CityNotes } from "../components/CityNotes";
+import { CityPhotoEditor } from "../components/CityPhotoEditor";
 import { PhotoCreditLine } from "../components/PhotoCreditLine";
+import { ReviewEditor } from "../components/ReviewEditor";
 import { RateCity } from "../components/RateCity";
 import { SpotForm } from "../components/SpotForm";
 import { SpotList } from "../components/SpotList";
 import { Stamp } from "../components/Stamp";
-import { Stars } from "../components/Stars";
 import { cityById } from "../data/cities";
-import { FEED } from "../data/seed";
 import { isWished, rankOf, ratingOf, visitsFor } from "../lib/ranking";
 import { useLog } from "../state/LogContext";
 
@@ -15,6 +16,8 @@ export function CityPage() {
   const { id = "" } = useParams();
   const { log, toggleWishlist } = useLog();
   const [addingSpot, setAddingSpot] = useState(false);
+  const [editingPhoto, setEditingPhoto] = useState(false);
+  const [editingReview, setEditingReview] = useState(false);
   const city = cityById(id);
 
   if (!city) {
@@ -32,7 +35,7 @@ export function CityPage() {
   const wished = isWished(log, city.id);
   const rank = rankOf(log, city.id);
   const visits = visitsFor(log, city.id);
-  const friends = FEED.filter((item) => item.city === city.id);
+  const review = log.reviews[city.id];
 
   return (
     <section className="screen">
@@ -48,27 +51,33 @@ export function CityPage() {
             date={visits[0]?.when.toUpperCase()}
             stars={<RateCity city={city} size={14} label={`Rate ${city.name} on the stamp`} />}
           />
-          <PhotoCreditLine city={city.id} />
+          {/* Credit and control on one line: whoever wants to change the photo
+              is looking at the photo, not at a menu somewhere else. */}
+          <div className="photo-line">
+            <PhotoCreditLine city={city.id} />
+            <button className="ghost" onClick={() => setEditingPhoto(true)}>
+              Change photo
+            </button>
+          </div>
         </div>
-        <div>
-          <p className="eyebrow">
-            {city.country} · {city.cc} · {city.region}
-          </p>
-          <h1>{city.name}</h1>
-          <div className="city-meta">
-            {rating === null ? (
-              <div className="pstat left">
-                {/* Rateable straight from here, so a city can be scored without
-                    logging a trip first. */}
-                <RateCity city={city} />
-                <span>Tap to rate</span>
-              </div>
-            ) : (
-              <>
-                <div className="pstat left">
-                  <RateCity city={city} />
-                  <span>Your rating · tap to change</span>
-                </div>
+        {/* Title block, and the facts in the column beside it. */}
+        <div className="city-head">
+          <div>
+            <p className="eyebrow">
+              {city.country} · {city.region}
+            </p>
+            <h1>{city.name}</h1>
+            {/* On the line the country tidbit used to have. Out of the strip
+                below, where it sat in a slot every other item labels and read
+                as a column with its heading missing. */}
+            <div className="city-rating">
+              <RateCity city={city} />
+              {rating === null && <small>Tap to rate</small>}
+            </div>
+
+            {/* Four of the same kind of thing: a number and what it counts. */}
+            {rating !== null && (
+              <div className="city-meta">
                 <div className="pstat left">
                   <b>#{rank.pos}</b>
                   <span>of your {rank.total}</span>
@@ -77,24 +86,94 @@ export function CityPage() {
                   <b>{visits.length}</b>
                   <span>{visits.length === 1 ? "Visit" : "Visits"}</span>
                 </div>
-              </>
+                {/* The ends of the run. Every visit in between is listed further
+                    down. Newest first, the order the passport reads them in. */}
+                {visits.length > 1 && (
+                  <div className="pstat left when">
+                    <b>
+                      {visits[visits.length - 1].day} {visits[visits.length - 1].when}
+                    </b>
+                    <span>First</span>
+                  </div>
+                )}
+                {visits.length > 0 && (
+                  <div className="pstat left when">
+                    <b>
+                      {visits[0].day} {visits[0].when}
+                    </b>
+                    <span>{visits.length === 1 ? "Stamped" : "Latest"}</span>
+                  </div>
+                )}
+              </div>
             )}
-          </div>
-          <p className="empty" style={{ margin: 0 }}>
-            {rating === null
-              ? "Log a visit and it slots into your ranking."
-              : `Ranked against the other cities you gave ${rating} stars.`}
-          </p>
+            <p className="empty city-line">
+              {rating === null
+                ? "Log a visit and it slots into your ranking."
+                : `Ranked against the other cities you gave ${rating} stars.`}
+            </p>
 
-          <button
-            className={wished ? "wish-btn on" : "wish-btn"}
-            aria-pressed={wished}
-            onClick={() => toggleWishlist(city.id)}
-          >
-            {wished ? "✓ On your Departures board" : "+ Add to Departures"}
-          </button>
+            <button
+              className={wished ? "wish-btn on" : "wish-btn"}
+              aria-pressed={wished}
+              onClick={() => toggleWishlist(city.id)}
+            >
+              {wished ? "✓ On your Departures board" : "+ Add to Departures"}
+            </button>
+          </div>
+
+          <CityNotes city={city} />
         </div>
       </div>
+
+      {/* Both halves of what you have to say about the place, side by side: the
+          verdict, and the dates it is based on. Each ran the full width alone
+          and neither filled it — a three-line paragraph under a rule twice its
+          length, then a column of dates under another. The visits take the
+          measure the facts take above them, so the page keeps one right edge.
+          Only for a city you have been to: a review is a verdict, and there is
+          nothing to say about somewhere you haven't been. */}
+      {visits.length > 0 && (
+        <div className="yours">
+          <section className="reviews">
+            <div className="spots-head">
+              <h2 style={{ border: "none", margin: 0, padding: 0 }}>Your review</h2>
+              <button className="ghost" onClick={() => setEditingReview(true)}>
+                {review ? "Edit" : "+ Write one"}
+              </button>
+            </div>
+            {review ? (
+              <p className="your-review">{review}</p>
+            ) : (
+              <p className="empty">
+                Nothing yet. This is the city, not the trip — what you'd tell someone who asked
+                about it.
+              </p>
+            )}
+          </section>
+
+          <section className="visits-col">
+            <div className="spots-head">
+              <h2 style={{ border: "none", margin: 0, padding: 0 }}>
+                {visits.length === 1 ? "Your visit" : "Your visits"}
+              </h2>
+              <span className="side-count">{visits.length}</span>
+            </div>
+            <ul className="visit-log">
+              {visits.map((visit) => (
+                <li key={visit.id}>
+                  <time>
+                    {visit.day} {visit.when}
+                  </time>
+                  {/* Your own words about the trip, where there are some. The
+                      feed's notes belong to other people; this is the column
+                      the app had for everyone but you. */}
+                  <span>{visit.note ?? "Stamped"}</span>
+                </li>
+              ))}
+            </ul>
+          </section>
+        </div>
+      )}
 
       <div className="spots-head">
         <h2 style={{ border: "none", margin: 0, padding: 0 }}>Spots</h2>
@@ -105,45 +184,13 @@ export function CityPage() {
       <p className="lede">
         The things you'd actually tell someone about {city.name}, with a link or a photo if you have one.
       </p>
-      <SpotList city={city.id} />
+      <SpotList city={city} />
 
       {addingSpot && <SpotForm city={city} onClose={() => setAddingSpot(false)} />}
-
-      <div className="two-col" style={{ marginTop: "36px" }}>
-        <div>
-          <h2>Your visits</h2>
-          {visits.length === 0 ? (
-            <p className="empty">Nothing yet.</p>
-          ) : (
-            <ul className="visit-log">
-              {visits.map((visit) => (
-                <li key={visit.id}>
-                  <time>
-                    {visit.day} {visit.when}
-                  </time>
-                  <span>Stamped</span>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-        <div>
-          <h2>From people you follow</h2>
-          {friends.length === 0 ? (
-            <p className="empty">Nobody you follow has been.</p>
-          ) : (
-            friends.map((item) => (
-              <div className="friend-note" key={item.id}>
-                <div className="who-line">
-                  <b>{item.who}</b>
-                  <Stars value={item.rating} />
-                </div>
-                <p>{item.note}</p>
-              </div>
-            ))
-          )}
-        </div>
-      </div>
+      {editingPhoto && <CityPhotoEditor city={city} onClose={() => setEditingPhoto(false)} />}
+      {editingReview && visits.length > 0 && (
+        <ReviewEditor city={city} onClose={() => setEditingReview(false)} />
+      )}
     </section>
   );
 }

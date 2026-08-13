@@ -161,6 +161,8 @@ h2 {
 
 /* The section tabs sit under the profile block, not in the app bar — they
    describe one account, so they belong with the name and the stats. */
+/* The first thing in the page on every tab, and at the same height on every
+   tab — it is the row you navigate with, so it must not move when you use it. */
 .navtabs {
   display: flex;
   gap: 2px;
@@ -169,7 +171,7 @@ h2 {
   border-radius: 3px;
   background: var(--surface);
   padding: 4px 6px;
-  margin-bottom: 26px;
+  margin: 28px 0 26px;
 }
 
 .navtabs a {
@@ -231,12 +233,15 @@ h2 {
 
 /* ---------------------------------------------------------- profile --- */
 
+/* Under the tab strip now, so it takes the rule: nothing below it separates it
+   from the favourites, and the strip above it already has its own edge. */
 .profile {
   display: flex;
   align-items: center;
   gap: 20px;
-  /* No bottom rule: the tab strip below provides the separation now. */
-  padding: 28px 0 18px;
+  padding: 2px 0 22px;
+  margin-bottom: 26px;
+  border-bottom: 1px solid var(--rule);
   flex-wrap: wrap;
 }
 
@@ -287,6 +292,13 @@ h2 {
   font-variant-numeric: tabular-nums;
   letter-spacing: -0.02em;
   line-height: 1.2;
+}
+
+/* A date is eight characters where the counts are one or two. At the same
+   size it would out-shout the numbers it sits beside. */
+.pstat.when b {
+  font-size: 16px;
+  line-height: 1.58;
 }
 
 .pstat span {
@@ -651,52 +663,160 @@ select option {
   flex-direction: column;
 }
 
-.entry {
+/* A friend's trip: who, the photograph, and what they wrote, in one block.
+   Three columns so the words start on the same line as the name and stay in
+   one measure however long they run. */
+.fentry {
   display: grid;
-  grid-template-columns: 176px minmax(0, 1fr);
-  gap: 22px;
-  padding: 22px 0;
+  grid-template-columns: 40px 132px minmax(0, 1fr);
+  gap: 18px;
+  padding: 24px 0;
   border-bottom: 1px solid var(--rule);
 }
 
-.entry:first-child {
-  padding-top: 2px;
+.fentry:first-child {
+  padding-top: 4px;
 }
 
-.who-line {
+/* Initials, not a photograph: these people are invented, and a real avatar
+   would be the one thing on the screen pretending otherwise. */
+.favatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--surface-2);
+  color: var(--muted);
+  display: grid;
+  place-items: center;
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+}
+
+.favatar.small {
+  width: 26px;
+  height: 26px;
+  font-size: 10px;
+}
+
+.fshot {
+  display: block;
+  border: 1px solid var(--rule);
+  background: var(--surface);
+  padding: 4px;
+  align-self: start;
+}
+
+.fshot img {
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+  width: 100%;
+}
+
+.fwho {
   display: flex;
-  align-items: center;
-  gap: 9px;
-  margin-bottom: 6px;
+  align-items: baseline;
+  gap: 8px;
+  margin: 0 0 6px;
   flex-wrap: wrap;
 }
 
-.who-line b {
+.fwho b {
   font-weight: 600;
   font-size: 14px;
 }
 
-.who-line .handle,
-.who-line .when {
+.fwho .handle,
+.fwho .when,
+.fwho .fverb {
   font-family: var(--mono);
   font-size: 11px;
   color: var(--muted);
 }
 
-.entry h3 {
+.ftitle {
   font-family: var(--display);
   font-weight: normal;
-  font-size: 21px;
+  font-size: 24px;
   margin: 0 0 8px;
   display: flex;
-  align-items: center;
+  align-items: baseline;
   gap: 12px;
   flex-wrap: wrap;
 }
 
-.entry p {
-  margin: 0 0 11px;
-  max-width: 60ch;
+.ftitle small {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.ftitle a:hover {
+  color: var(--accent);
+}
+
+/* Their review, set as prose. The reason to read the feed at all. */
+.fsay {
+  margin: 12px 0 14px;
+  max-width: 66ch;
+  font-family: var(--display);
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+.fwish {
+  margin-top: 14px;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 0;
+}
+
+.fwish:hover {
+  color: var(--accent);
+}
+
+.fwish.on {
+  color: var(--accent-2);
+}
+
+/* Your own stamp: a line in the margin of everyone else's trips. */
+.fline {
+  display: grid;
+  grid-template-columns: 26px minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 6px;
+  border-bottom: 1px solid var(--rule);
+  border-radius: 2px;
+}
+
+.fline:hover {
+  background: var(--surface);
+}
+
+.ftext {
+  font-size: 13.5px;
+  color: var(--muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ftext b {
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.fline .when {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
 }
 
 .tags {
@@ -718,9 +838,9 @@ select option {
 
 /* --------------------------------------------------------- passport --- */
 
-.month {
+.year {
   font-family: var(--mono);
-  font-size: 10.5px;
+  font-size: 11.5px;
   letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--muted);
@@ -730,11 +850,11 @@ select option {
   gap: 12px;
 }
 
-.month:first-child {
+.year:first-child {
   margin-top: 0;
 }
 
-.month::after {
+.year::after {
   content: "";
   flex: 1;
   height: 1px;
@@ -743,7 +863,7 @@ select option {
 
 .drow {
   display: grid;
-  grid-template-columns: 54px 92px minmax(0, 1fr) auto auto;
+  grid-template-columns: 62px 92px minmax(0, 1fr) auto auto;
   align-items: center;
   gap: 16px;
   width: 100%;
@@ -790,6 +910,22 @@ select option {
   text-transform: uppercase;
   color: var(--muted);
   margin-top: 2px;
+}
+
+/* Neither a country code nor a sentence: a name, so mono but not shouted. */
+.drow .dname small.dwho {
+  letter-spacing: 0.06em;
+  text-transform: none;
+  font-size: 11px;
+}
+
+/* A country code is a label; a note is a sentence. */
+.drow .dname small.dnote {
+  font-family: var(--sans);
+  font-size: 13px;
+  letter-spacing: 0;
+  text-transform: none;
+  margin-top: 3px;
 }
 
 .again {
@@ -886,7 +1022,7 @@ select option {
   font-family: var(--display);
   font-weight: normal;
   font-size: 34px;
-  margin: 0 0 8px;
+  margin: 0 0 12px;
   text-wrap: balance;
 }
 
@@ -1339,6 +1475,63 @@ select option {
 
 /* ------------------------------------------------------------ spots --- */
 
+/* ------------------------------------------------------- city notes --- */
+
+/* The facts, in the column beside the title block. Ruled off on the left so
+   the two read as neighbours rather than as one run-on block. */
+.city-notes {
+  min-width: 0;
+  border-left: 1px solid var(--rule);
+  padding-left: 26px;
+}
+
+.notes-history {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13.5px;
+  line-height: 1.5;
+}
+
+.notes-cols {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 14px 22px;
+  margin-top: 14px;
+}
+
+.notes-head {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 0 0 4px;
+}
+
+.notes-fact {
+  margin-top: 14px;
+}
+
+.notes-fact p:last-child {
+  margin: 0;
+  font-family: var(--display);
+  font-size: 15.5px;
+  line-height: 1.5;
+}
+
+.notes-col ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.notes-col li {
+  font-family: var(--display);
+  font-size: 15.5px;
+  line-height: 1.45;
+}
+
+
 .spots-head {
   display: flex;
   align-items: center;
@@ -1435,19 +1628,13 @@ select option {
   color: var(--accent);
 }
 
-.spot-remove {
+.spot-edit {
   flex: none;
   padding: 0 2px;
-  font-size: 12px;
+  font-size: 13px;
 }
 
 /* -------------------------------------------------------- spot form --- */
-
-.chip.on {
-  border-color: var(--accent);
-  background: var(--accent);
-  color: #fff6f1;
-}
 
 .search.bad {
   border-color: var(--accent);
@@ -1506,6 +1693,36 @@ select option {
   border-radius: 2px;
 }
 
+/* The city photo as it stands, shown at the size it is actually seen at
+   rather than as a thumbnail - you are about to decide whether to replace it. */
+.photo-preview {
+  position: relative;
+  margin: 0 0 16px;
+}
+
+.photo-preview img {
+  width: 100%;
+  aspect-ratio: 3/2;
+  object-fit: cover;
+  border-radius: 2px;
+  display: block;
+}
+
+.photo-tag {
+  position: absolute;
+  left: 8px;
+  bottom: 8px;
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+  padding: 3px 7px;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
 /* ----------------------------------------------------- photo credit --- */
 
 .photo-credit {
@@ -1521,6 +1738,19 @@ select option {
   color: var(--muted);
   text-decoration: underline;
   text-underline-offset: 2px;
+}
+
+/* Stacked rather than side by side: the stamp column is narrow, and a credit
+   long enough to wrap would otherwise close in around the button. */
+.photo-line {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 7px;
+}
+
+.photo-line .ghost {
+  white-space: nowrap;
 }
 
 .photo-credit a:hover {
@@ -1543,9 +1773,13 @@ select option {
   color: var(--accent);
 }
 
+/* 264 rather than 300 for the stamp: at 300 the column stood 301 points tall
+   and the title block beside it only reaches about 250, so the stamp set a
+   floor the text could never meet and left the gap under it. Barely smaller to
+   look at; the two columns now end within a few points of each other. */
 .city-top {
   display: grid;
-  grid-template-columns: 300px minmax(0, 1fr);
+  grid-template-columns: 264px minmax(0, 1fr);
   gap: 36px;
   margin-bottom: 34px;
 }
@@ -1554,7 +1788,37 @@ select option {
   font-family: var(--display);
   font-weight: normal;
   font-size: 36px;
-  margin: 0 0 6px;
+  margin: 0;
+}
+
+.city-rating {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.city-rating small {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* Title block and facts, side by side. The facts take a fixed measure so the
+   title block keeps the rest, rather than the two splitting it evenly. */
+.city-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 340px);
+  gap: 22px 32px;
+}
+
+/* A margin rather than none, so the line still clears the standing above it
+   when there is no stat strip between them. It collapses against the strip's
+   own bottom margin when there is. */
+.city-line {
+  margin: 18px 0 0;
 }
 
 .city-meta {
@@ -1564,10 +1828,39 @@ select option {
   flex-wrap: wrap;
 }
 
-.two-col {
+/* The identity block takes the width it needs; the stamped visits take the
+   rest, which is what the column had spare. */
+/* Title block and facts, side by side. The facts take a fixed measure so the
+   title block keeps the rest, rather than the two splitting it evenly. */
+.city-head {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  gap: 40px;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 340px);
+  gap: 22px 32px;
+}
+
+/* A margin rather than none, so the line still clears the standing above it
+   when there is no stat strip between them. It collapses against the strip's
+   own bottom margin when there is. */
+.city-line {
+  margin: 18px 0 0;
+}
+
+.city-meta {
+  display: flex;
+  gap: 30px;
+  margin: 18px 0 20px;
+  flex-wrap: wrap;
+}
+
+/* The identity block takes the width it needs; the stamped visits take the
+   rest, which is what the column had spare. */
+/* Subtitles the city name. Left to run to its natural length rather than
+   wrapped at a reading measure: it is one sentence, and for a city you have
+   not rated it is the only thing holding the width of the row. */
+.city-standing {
+  margin: 0;
+  color: var(--muted);
+  max-width: 72ch;
 }
 
 .visit-log {
@@ -1594,14 +1887,102 @@ select option {
   width: 92px;
 }
 
-.friend-note {
-  padding: 11px 0;
-  border-bottom: 1px solid var(--rule);
+/* A note runs longer than "Stamped" did, so the row wraps rather than
+   pushing the date out of its column. */
+.visit-log li {
+  align-items: baseline;
 }
 
-.friend-note p {
-  margin: 6px 0 0;
-  font-size: 14px;
+.visit-log li > span {
+  min-width: 0;
+}
+
+/* ---------------------------------------------------- a friend's trip --- */
+/* The photograph plain, in the slot the stamp takes on your own city page.
+   Same footprint, visibly not a stamp — which is the whole point of the
+   screen: you haven't been here. */
+.friend-shot {
+  border: 1px solid var(--rule);
+  background: var(--surface);
+  padding: 8px;
+}
+
+.friend-shot img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+}
+
+.friend-by {
+  display: flex;
+  align-items: baseline;
+  gap: 9px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+
+.friend-by b {
+  font-weight: 600;
+  font-size: 15px;
+}
+
+.friend-by .handle,
+.friend-by .when {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--muted);
+}
+
+/* Their words, set like prose rather than like a caption — it is the reason
+   the screen exists. */
+.friend-say {
+  margin: 16px 0 18px;
+  max-width: 68ch;
+  font-family: var(--display);
+  font-size: 17px;
+  line-height: 1.6;
+}
+
+/* Your verdict and your dates in one band, on the column widths the facts use
+   above them — so the right edge of the visits lines up with the right edge of
+   the notes, and neither block is left holding half a page of nothing. */
+.yours {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 340px);
+  gap: 22px 32px;
+  align-items: start;
+  margin-bottom: 8px;
+}
+
+/* Both headings start level: the review's rule and the visits' rule are the
+   top of the same band, so neither gets its section's usual leading. */
+.yours .spots-head {
+  margin-top: 0;
+}
+
+.visits-col .visit-log li:last-child {
+  border-bottom: none;
+}
+
+@media (max-width: 900px) {
+  .yours {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Prose, set like the notes it sits above rather than like a form field. */
+.your-review {
+  margin: 14px 0 0;
+  max-width: 72ch;
+  font-family: var(--display);
+  font-size: 17px;
+  line-height: 1.6;
+}
+
+.review-box {
+  font-family: var(--sans);
+  min-height: 132px;
 }
 
 /* ------------------------------------------------------------ stamp --- */
@@ -1692,28 +2073,67 @@ select option {
 
 /* ------------------------------------------------------------ modal --- */
 
+/* Anchored near the top rather than centred. The sheet changes height as you
+   type and as the flow moves on; centred, every change nudges the whole thing
+   up or down under the cursor. Pinned, only its bottom edge moves. */
 .veil {
   position: fixed;
   inset: 0;
   z-index: 30;
   background: rgba(12, 20, 26, 0.66);
   display: grid;
-  place-items: center;
-  padding: 24px;
+  align-items: start;
+  justify-items: center;
+  padding: 7vh 24px 24px;
+  overflow-y: auto;
+  /* Scrolls, but without drawing a bar over the page behind it. */
+  scrollbar-width: none;
 }
 
+.veil::-webkit-scrollbar {
+  display: none;
+}
+
+/* No scroller of its own. A tall panel used to grow a bar down its own edge,
+   inside the sheet, next to the content; the veil scrolls the whole thing
+   instead, and its own bar is hidden. */
 .sheet {
   background: var(--surface);
   border: 1px solid var(--rule);
   border-radius: 4px;
   width: min(560px, 100%);
-  max-height: 88vh;
-  overflow: auto;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
 }
 
 .sheet-body {
-  padding: 26px 28px 28px;
+  padding: 20px 24px 22px;
+}
+
+/* One screen of a multi-step sheet. No floor under it: the sheet is pinned to
+   the top of the veil, so a short screen is just a short sheet rather than a
+   tall one with a hole in it. */
+.step {
+  display: flex;
+  flex-direction: column;
+  animation: step-in 160ms ease-out;
+}
+
+/* Pinned to the bottom of the step rather than to whatever it follows, so Back
+   and Cancel stay where your cursor left them. */
+.step .sheet-foot {
+  margin-top: auto;
+  padding-top: 16px;
+}
+
+@keyframes step-in {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 
 .sheet h2 {
@@ -1725,8 +2145,8 @@ select option {
 .sheet h3 {
   font-family: var(--display);
   font-weight: normal;
-  font-size: 24px;
-  margin: 0 0 18px;
+  font-size: 21px;
+  margin: 0 0 12px;
   text-wrap: balance;
 }
 
@@ -1754,6 +2174,12 @@ select option {
   gap: 2px;
   max-height: 280px;
   overflow: auto;
+  /* The list cuts a row in half at the fold, which says "more" without a bar. */
+  scrollbar-width: none;
+}
+
+.options::-webkit-scrollbar {
+  display: none;
 }
 
 .option {
@@ -1821,8 +2247,196 @@ select option {
   letter-spacing: 0.04em;
 }
 
-.chip:hover {
+/* :not(.on), and the selected rule after it: hover used to win on a chip that
+   was already chosen and paint its label the same red as its background. */
+.chip:hover:not(.on) {
   border-color: var(--accent);
+  color: var(--accent);
+}
+
+.chip.on {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: #fff6f1;
+}
+
+/* -------------------------------------------------------- log panel --- */
+
+/* The photo and the date, on the row under the city's name. */
+.log-top {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 12px;
+}
+
+.log-shot {
+  flex: none;
+  width: 76px;
+}
+
+.log-shot img {
+  width: 100%;
+  aspect-ratio: 3/2;
+  object-fit: cover;
+  border-radius: 2px;
+}
+
+.log-when {
+  min-width: 0;
+}
+
+/* Reads as a field rather than a button: it holds a value you can change. */
+.date-btn {
+  display: block;
+  margin-top: 6px;
+  padding: 8px 12px;
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+  background: var(--bg);
+  font-family: var(--mono);
+  font-size: 13px;
+  letter-spacing: 0.06em;
+  color: var(--ink);
+}
+
+.date-btn:hover,
+.date-btn.on {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.log-field {
+  display: block;
+  margin-bottom: 12px;
+}
+
+.log-field .field-label {
+  margin-bottom: 5px;
+}
+
+.log-field .picker {
+  align-items: flex-start;
+  padding: 0;
+}
+
+.log-field .search {
+  margin-bottom: 0;
+}
+
+.log-field .chips {
+  margin-bottom: 8px;
+}
+
+.note-box {
+  resize: vertical;
+  min-height: 52px;
+  line-height: 1.45;
+}
+
+/* Cancel sits beside Save rather than across the sheet from it: on this
+   screen the pair is one decision, and Back is the other. */
+.foot-pair {
+  display: inline-flex;
+  align-items: center;
+  gap: 16px;
+}
+
+/* ------------------------------------------------------------ dates --- */
+
+/* A calendar page rather than a form control: ruled, monospaced, and narrow
+   enough that the cells stay square-ish instead of stretching into bars. The
+   native date input this replaced brought the OS's own styling with it, which
+   is the one thing on the page that could never match. */
+.cal {
+  /* An auto cross-axis margin turns off the flex stretch, so the width has to
+     be asked for or the calendar shrinks to fit its digits. */
+  width: 100%;
+  max-width: 340px;
+  margin: 0 auto 20px;
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+  overflow: hidden;
+  background: var(--bg);
+}
+
+.cal-head {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 7px 8px;
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--rule);
+}
+
+.cal-title {
+  flex: 1;
+  text-align: center;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+
+.cal-step {
+  width: 24px;
+  height: 24px;
+  border-radius: 2px;
+  font-family: var(--mono);
+  font-size: 13px;
+  line-height: 1;
+  color: var(--muted);
+  flex: none;
+}
+
+.cal-step:hover:not(:disabled) {
+  background: var(--surface);
+  color: var(--accent);
+}
+
+.cal-step:disabled {
+  opacity: 0.28;
+  cursor: default;
+}
+
+.cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  padding: 6px;
+  gap: 1px;
+}
+
+.cal-dow {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  text-align: center;
+  padding-bottom: 4px;
+}
+
+.cal-day {
+  min-height: 30px;
+  border-radius: 2px;
+  font-family: var(--mono);
+  font-size: 12.5px;
+  color: var(--ink);
+}
+
+.cal-day:hover:not(:disabled) {
+  background: var(--accent);
+  color: var(--stamp-bg);
+}
+
+/* Not selectable, so it reads as unavailable rather than merely quiet. */
+.cal-day:disabled {
+  color: var(--star-empty);
+  cursor: default;
+}
+
+.cal-day.today {
+  box-shadow: inset 0 0 0 1px var(--accent);
   color: var(--accent);
 }
 
@@ -1832,6 +2446,14 @@ select option {
   align-items: center;
   gap: 10px;
   padding: 6px 0 2px;
+}
+
+/* The rating step is the shortest of them, so the stars take the slack the
+   step's floor leaves and sit in the middle of the sheet, rather than being
+   stranded under the heading with a void beneath. */
+.step .picker {
+  flex: 1;
+  justify-content: center;
 }
 
 .picker-stars {
@@ -1970,18 +2592,22 @@ select option {
     gap: 14px;
   }
 
+  /* All of these stack. minmax(0, …) rather than a plain 1fr: a 1fr track
+     grows to its content's min-content width, which wide children can push
+     past the edge of the screen. */
   .city-top,
-  .two-col {
-    grid-template-columns: 1fr;
+  .city-head {
+    grid-template-columns: minmax(0, 1fr);
     gap: 24px;
   }
 
   .drow {
-    grid-template-columns: 46px 68px minmax(0, 1fr) auto;
+    grid-template-columns: 58px 68px minmax(0, 1fr) auto;
     gap: 12px;
   }
 
   .drow .again {
     display: none;
   }
+
 }

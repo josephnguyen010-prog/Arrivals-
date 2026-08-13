@@ -4,8 +4,6 @@ export interface City {
   id: CityId;
   name: string;
   country: string;
-  /** ISO 3166-1 alpha-3, printed on the arrival stamp. */
-  cc: string;
   region: "Asia" | "Europe" | "Americas" | "Africa" | "Oceania";
   photo: string;
 }
@@ -16,6 +14,8 @@ export interface Visit {
   /** Month and year, e.g. "Mar 2026". Visits are day-precision at most. */
   when: string;
   day: string;
+  /** What the trip was like. Yours — the feed's notes belong to other people. */
+  note?: string;
 }
 
 /**
@@ -28,6 +28,12 @@ export interface LogState {
   visits: Visit[];
   /** Departures: cities you mean to reach, newest intention first. */
   wishlist: CityId[];
+  /**
+   * What you think of the city, as against a visit's note, which is what one
+   * trip was like. The same split as the rating: the city is the thing you
+   * have an opinion about, the trip is the thing that happened.
+   */
+  reviews: Record<CityId, string>;
 }
 
 export const SPOT_CATEGORIES = [
@@ -60,6 +66,10 @@ export interface Placement {
   asked: number;
 }
 
+/**
+ * Someone you follow, and a trip they logged. Their note is their review of the
+ * city, and it is read-only: it lives on the entry, not on your city page.
+ */
 export interface FeedItem {
   id: string;
   who: string;

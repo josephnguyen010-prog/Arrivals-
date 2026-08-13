@@ -3,6 +3,7 @@ import { CITIES } from "../data/cities";
 import { ratingOf } from "../lib/ranking";
 import { useLog } from "../state/LogContext";
 import type { CityId, CityList } from "../types";
+import { CityPhoto } from "./CityPhoto";
 import { Modal } from "./Modal";
 import { Stars } from "./Stars";
 
@@ -77,7 +78,7 @@ export function ListEditor({ list, onSave, onClose }: ListEditorProps) {
               return (
                 <li key={id}>
                   <span className="list-pos small">{index + 1}</span>
-                  <img src={city.photo} alt="" />
+                  <CityPhoto city={city} />
                   <b>{city.name}</b>
                   <span className="reorder">
                     <button
@@ -111,7 +112,7 @@ export function ListEditor({ list, onSave, onClose }: ListEditorProps) {
       <div className="options">
         {CITIES.filter((city) => !cities.includes(city.id)).map((city) => (
           <button key={city.id} className="option" onClick={() => toggle(city.id)}>
-            <img src={city.photo} alt="" />
+            <CityPhoto city={city} />
             <span>
               <b>{city.name}</b>
               <small>{city.country}</small>

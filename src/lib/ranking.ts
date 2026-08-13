@@ -79,6 +79,17 @@ export function recordAnswer(placement: Placement, challengerWon: boolean): Plac
   };
 }
 
+/**
+ * Where a placement lands if the questions stop early. The middle of what is
+ * left of the bracket, because that is the least the answers so far claim:
+ * settling on `lo` instead would file a city nobody compared at the top of its
+ * rating, which is a verdict rather than the absence of one.
+ */
+export function settleEarly(placement: Placement): Placement {
+  const mid = (placement.lo + placement.hi) >> 1;
+  return { ...placement, lo: mid, hi: mid };
+}
+
 /** Questions still to come before the slot is settled. */
 export function questionsLeft(placement: Placement): number {
   const span = placement.hi - placement.lo;

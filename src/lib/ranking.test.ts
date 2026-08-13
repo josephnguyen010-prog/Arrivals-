@@ -10,6 +10,7 @@ import {
   rankOf,
   ratingOf,
   recordAnswer,
+  settleEarly,
   startPlacement,
   toggleWish,
   visitOrdinals,
@@ -17,7 +18,7 @@ import {
 
 /** Builds a log without repeating the empty fields at every call site. */
 function log(partial: Partial<LogState> = {}): LogState {
-  return { rated: {}, visits: [], wishlist: [], ...partial };
+  return { rated: {}, visits: [], wishlist: [], reviews: {}, ...partial };
 }
 
 const empty: LogState = log();
@@ -73,6 +74,29 @@ describe("placing a city", () => {
       state = next;
     }
     expect(state.rated["3"]).toHaveLength(15);
+  });
+});
+
+describe("leaving the questions early", () => {
+  const state: LogState = log({ rated: { "4": ["best", "middle", "worst"] } });
+
+  it("lands in the middle of the rating when nothing was answered", () => {
+    const { state: cleaned, placement } = startPlacement(state, "new", 4);
+    const settled = finishPlacement(cleaned, settleEarly(placement));
+    expect(settled.rated["4"]).toEqual(["best", "new", "middle", "worst"]);
+  });
+
+  it("keeps what the answers so far ruled out", () => {
+    const { state: cleaned, placement } = startPlacement(state, "new", 4);
+    // Lost to "middle", so it belongs somewhere below it either way.
+    const answered = recordAnswer(placement, false);
+    const settled = finishPlacement(cleaned, settleEarly(answered));
+    expect(settled.rated["4"].indexOf("new")).toBeGreaterThan(settled.rated["4"].indexOf("middle"));
+  });
+
+  it("leaves a settled placement where it already is", () => {
+    const settled = { cityId: "new", rating: 4, lo: 2, hi: 2, asked: 2 };
+    expect(settleEarly(settled)).toEqual(settled);
   });
 });
 

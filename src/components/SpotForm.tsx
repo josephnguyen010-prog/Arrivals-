@@ -1,23 +1,27 @@
 import { useState } from "react";
 import type { ChangeEvent } from "react";
-import { StorageFullError, downscaleImage, safeUrl } from "../lib/spots";
+import { downscaleImage } from "../lib/images";
+import { StorageFullError } from "../lib/quota";
+import { safeUrl } from "../lib/spots";
 import { useSpots } from "../state/SpotsContext";
 import { SPOT_CATEGORIES } from "../types";
-import type { City, SpotCategory } from "../types";
+import type { City, Spot, SpotCategory } from "../types";
 import { Modal } from "./Modal";
 
 interface SpotFormProps {
   city: City;
+  /** Given, the form edits that spot in place instead of adding a new one. */
+  spot?: Spot;
   onClose: () => void;
 }
 
-export function SpotForm({ city, onClose }: SpotFormProps) {
-  const { add } = useSpots();
-  const [category, setCategory] = useState<SpotCategory>(SPOT_CATEGORIES[0]);
-  const [name, setName] = useState("");
-  const [link, setLink] = useState("");
-  const [note, setNote] = useState("");
-  const [photo, setPhoto] = useState<string | undefined>();
+export function SpotForm({ city, spot, onClose }: SpotFormProps) {
+  const { add, update, remove } = useSpots();
+  const [category, setCategory] = useState<SpotCategory>(spot?.category ?? SPOT_CATEGORIES[0]);
+  const [name, setName] = useState(spot?.name ?? "");
+  const [link, setLink] = useState(spot?.url ?? "");
+  const [note, setNote] = useState(spot?.note ?? "");
+  const [photo, setPhoto] = useState<string | undefined>(spot?.photo);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -42,15 +46,17 @@ export function SpotForm({ city, onClose }: SpotFormProps) {
 
   function onSave() {
     setError(null);
+    const next = {
+      city: city.id,
+      category,
+      name: name.trim(),
+      note: note.trim() || undefined,
+      url: resolvedLink ?? undefined,
+      photo,
+    };
     try {
-      add({
-        city: city.id,
-        category,
-        name: name.trim(),
-        note: note.trim() || undefined,
-        url: resolvedLink ?? undefined,
-        photo,
-      });
+      if (spot) update(spot.id, next);
+      else add(next);
       onClose();
     } catch (caught) {
       setError(caught instanceof StorageFullError ? caught.message : "That could not be saved.");
@@ -60,7 +66,7 @@ export function SpotForm({ city, onClose }: SpotFormProps) {
   return (
     <Modal onClose={onClose} labelledBy="spot-form-title">
       <h2 id="spot-form-title">{city.name}</h2>
-      <h3>Add a spot</h3>
+      <h3>{spot ? "Edit this spot" : "Add a spot"}</h3>
       <p className="hint">
         The thing you would actually tell someone about. A link or a photo is optional.
       </p>
@@ -129,12 +135,27 @@ export function SpotForm({ city, onClose }: SpotFormProps) {
       {error && <p className="field-error block">{error}</p>}
 
       <div className="sheet-foot">
-        <button className="ghost" onClick={onClose}>
-          Cancel
-        </button>
-        <button className="log-btn" disabled={!canSave} onClick={onSave}>
-          Add spot
-        </button>
+        {spot ? (
+          <button
+            className="ghost danger"
+            onClick={() => {
+              remove(spot.id);
+              onClose();
+            }}
+          >
+            Remove this spot
+          </button>
+        ) : (
+          <span />
+        )}
+        <span className="foot-pair">
+          <button className="ghost" onClick={onClose}>
+            Cancel
+          </button>
+          <button className="log-btn" disabled={!canSave} onClick={onSave}>
+            {spot ? "Save" : "Add spot"}
+          </button>
+        </span>
       </div>
     </Modal>
   );

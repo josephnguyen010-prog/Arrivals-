@@ -6,7 +6,6 @@ const city = (id: string, name: string, country: string): City => ({
   id,
   name,
   country,
-  cc: id.toUpperCase(),
   region: "Asia",
   photo: "",
 });

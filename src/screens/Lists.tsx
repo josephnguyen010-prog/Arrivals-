@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { CityPhoto } from "../components/CityPhoto";
 import { ListEditor } from "../components/ListEditor";
 import { requireCity } from "../data/cities";
 import { useLists } from "../state/ListsContext";
@@ -63,7 +64,7 @@ function ListCard({ list }: { list: CityList }) {
     <Link className="list-card" to={`/list/${list.id}`}>
       <div className="strip">
         {list.cities.slice(0, 5).map((id) => (
-          <img key={id} src={requireCity(id).photo} alt="" loading="lazy" />
+          <CityPhoto key={id} city={requireCity(id)} loading="lazy" />
         ))}
         {list.cities.length === 0 && <div className="strip-empty" />}
       </div>

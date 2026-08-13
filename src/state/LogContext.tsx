@@ -7,14 +7,20 @@ import type { Placement } from "../types";
 
 interface LogContextValue {
   log: LogState;
-  /** Applies a finished placement and records the trip that prompted it. */
-  commitVisit: (placement: Placement, visit: Omit<Visit, "id">) => void;
+  /**
+   * Records a trip, and applies the placement that came with it. The placement
+   * is null when the visit was logged without a rating: the city stays
+   * unranked until you give it one.
+   */
+  commitVisit: (placement: Placement | null, visit: Omit<Visit, "id">) => void;
   /** Prepares an insertion; the flow drives it and hands back the result. */
   begin: (cityId: CityId, rating: number) => { state: LogState; placement: Placement };
   /** Applies a finished placement on its own, for re-rating an existing city. */
   applyPlacement: (placement: Placement) => void;
   /** Adds or removes a city from Departures. */
   toggleWishlist: (cityId: CityId) => void;
+  /** Your review of the city. Blank clears it rather than storing an empty. */
+  setReview: (cityId: CityId, text: string) => void;
   /** Forgets a city entirely: its rating and every visit to it. */
   removeCity: (cityId: CityId) => void;
   removeVisit: (visitId: string) => void;
@@ -35,8 +41,9 @@ export function LogProvider({ children }: { children: ReactNode }) {
     [log],
   );
 
-  const commitVisit = useCallback((placement: Placement, visit: Omit<Visit, "id">) => {
+  const commitVisit = useCallback((placement: Placement | null, visit: Omit<Visit, "id">) => {
     setLog((current) => {
+      if (!placement) return addVisit(current, { ...visit, id: `v${Date.now()}` });
       // Re-derive the placement against the live log so the write can't be
       // based on a stale snapshot taken when the flow opened.
       const { state: cleaned } = startPlacement(current, placement.cityId, placement.rating);
@@ -54,6 +61,16 @@ export function LogProvider({ children }: { children: ReactNode }) {
 
   const toggleWishlist = useCallback((cityId: CityId) => {
     setLog((current) => toggleWish(current, cityId));
+  }, []);
+
+  const setReview = useCallback((cityId: CityId, text: string) => {
+    setLog((current) => {
+      const reviews = { ...current.reviews };
+      const trimmed = text.trim();
+      if (trimmed) reviews[cityId] = trimmed;
+      else delete reviews[cityId];
+      return { ...current, reviews };
+    });
   }, []);
 
   const removeCity = useCallback((cityId: CityId) => {
@@ -80,8 +97,18 @@ export function LogProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const value = useMemo(
-    () => ({ log, commitVisit, begin, applyPlacement, toggleWishlist, removeCity, removeVisit, reset }),
-    [log, commitVisit, begin, applyPlacement, toggleWishlist, removeCity, removeVisit, reset],
+    () => ({
+      log,
+      commitVisit,
+      begin,
+      applyPlacement,
+      toggleWishlist,
+      setReview,
+      removeCity,
+      removeVisit,
+      reset,
+    }),
+    [log, commitVisit, begin, applyPlacement, toggleWishlist, setReview, removeCity, removeVisit, reset],
   );
 
   return <LogContext.Provider value={value}>{children}</LogContext.Provider>;

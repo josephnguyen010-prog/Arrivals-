@@ -4,6 +4,7 @@ import { ratingOf } from "../lib/ranking";
 import { searchCities } from "../lib/search";
 import { useLog } from "../state/LogContext";
 import { MAX_FAVOURITES, useProfile } from "../state/ProfileContext";
+import { CityPhoto } from "./CityPhoto";
 import { Modal } from "./Modal";
 import { Stars } from "./Stars";
 
@@ -44,7 +45,7 @@ export function FavouritesPicker({ onClose }: { onClose: () => void }) {
             return (
               <li key={id}>
                 <span className="list-pos small">{index + 1}</span>
-                <img src={city.photo} alt="" />
+                <CityPhoto city={city} />
                 <b>{city.name}</b>
                 <span className="reorder">
                   <button
@@ -100,7 +101,7 @@ export function FavouritesPicker({ onClose }: { onClose: () => void }) {
                   setTerm("");
                 }}
               >
-                <img src={city.photo} alt="" />
+                <CityPhoto city={city} />
                 <span>
                   <b>{city.name}</b>
                   <small>{city.country}</small>

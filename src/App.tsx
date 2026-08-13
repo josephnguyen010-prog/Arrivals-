@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Route, Routes } from "react-router-dom";
+import { Route, Routes, useLocation } from "react-router-dom";
 import { LogVisitFlow } from "./components/LogVisitFlow";
 import { NavTabs } from "./components/NavTabs";
 import { ProfileHeader } from "./components/ProfileHeader";
@@ -8,6 +8,7 @@ import { Activity } from "./screens/Activity";
 import { Cities } from "./screens/Cities";
 import { CityPage } from "./screens/CityPage";
 import { Departures } from "./screens/Departures";
+import { FriendVisit } from "./screens/FriendVisit";
 import { ListPage } from "./screens/ListPage";
 import { Lists } from "./screens/Lists";
 import { Passport } from "./screens/Passport";
@@ -15,18 +16,29 @@ import { Profile } from "./screens/Profile";
 
 export function App() {
   const [logging, setLogging] = useState(false);
+  // Who you are belongs on your own tab. On every other screen it was a
+  // letterhead: the same name and the same five numbers standing over a feed
+  // of other people's trips, or over a city that isn't yours.
+  //
+  // Below the tabs rather than above them. Above, the strip sat at a different
+  // height on Profile than everywhere else, so every tab change jolted it up
+  // or down the page. Below, the one fixed thing on the screen is the row you
+  // navigate with, and the block that comes and goes does it underneath.
+  const onProfile = useLocation().pathname === "/";
 
   return (
     <>
       <TopBar onLogVisit={() => setLogging(true)} />
 
       <div className="wrap">
-        <ProfileHeader />
         <NavTabs />
+        {onProfile && <ProfileHeader />}
 
         <Routes>
           <Route path="/" element={<Profile />} />
           <Route path="/activity" element={<Activity />} />
+          {/* A feed entry, not a city: what one person said about it. */}
+          <Route path="/activity/:id" element={<FriendVisit />} />
           <Route path="/cities" element={<Cities />} />
           <Route path="/departures" element={<Departures />} />
           <Route path="/passport" element={<Passport />} />

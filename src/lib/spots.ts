@@ -1,16 +1,10 @@
 import type { CityId, Spot } from "../types";
 import { SEED_SPOTS } from "../data/spots";
+import { writeCapped } from "./quota";
 
 const KEY = "arrivals.spots.v1";
-
-/**
- * localStorage is a few megabytes for the whole origin, and photos are the
- * only thing here big enough to threaten it, so they are downscaled before
- * they are ever stored and the total is checked before a write.
- */
-export const MAX_EDGE = 900;
-export const JPEG_QUALITY = 0.72;
 const BUDGET_BYTES = 3_500_000;
+const FULL_MESSAGE = "There isn't room to save that photo. Remove a spot photo and try again.";
 
 export function loadSpots(): Spot[] {
   try {
@@ -28,23 +22,8 @@ export function loadSpots(): Spot[] {
   }
 }
 
-export class StorageFullError extends Error {
-  constructor() {
-    super("There isn't room to save that photo. Remove a spot photo and try again.");
-    this.name = "StorageFullError";
-  }
-}
-
 export function saveSpots(spots: Spot[]): void {
-  const payload = JSON.stringify(spots);
-  // Checked up front so the caller can explain, rather than failing silently
-  // the way a swallowed quota error would.
-  if (payload.length > BUDGET_BYTES) throw new StorageFullError();
-  try {
-    localStorage.setItem(KEY, payload);
-  } catch {
-    throw new StorageFullError();
-  }
+  writeCapped(KEY, JSON.stringify(spots), BUDGET_BYTES, FULL_MESSAGE);
 }
 
 export function spotsForCity(spots: Spot[], city: CityId): Spot[] {
@@ -81,32 +60,6 @@ export function linkLabel(url: string): string {
   } catch {
     return url;
   }
-}
-
-/**
- * Reads a picked image, scales its longest edge down to MAX_EDGE and re-encodes
- * it as JPEG. A phone photo is several megabytes; this lands around 60-120KB,
- * which is what makes storing it locally viable at all.
- */
-export async function downscaleImage(file: File): Promise<string> {
-  const bitmap = await createImageBitmap(file);
-  const scale = Math.min(1, MAX_EDGE / Math.max(bitmap.width, bitmap.height));
-  const width = Math.round(bitmap.width * scale);
-  const height = Math.round(bitmap.height * scale);
-
-  const canvas = document.createElement("canvas");
-  canvas.width = width;
-  canvas.height = height;
-
-  const context = canvas.getContext("2d");
-  if (!context) {
-    bitmap.close();
-    throw new Error("Could not read that image.");
-  }
-  context.drawImage(bitmap, 0, 0, width, height);
-  bitmap.close();
-
-  return canvas.toDataURL("image/jpeg", JPEG_QUALITY);
 }
 
 export function makeSpot(spot: Omit<Spot, "id">): Spot {

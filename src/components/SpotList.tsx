@@ -1,14 +1,16 @@
-import { Fragment } from "react";
+import { Fragment, useState } from "react";
 import { SPOT_PHOTO_CREDITS, commonsUrl } from "../data/credits";
 import { linkLabel } from "../lib/spots";
 import { useSpots } from "../state/SpotsContext";
 import { SPOT_CATEGORIES } from "../types";
-import type { CityId, Spot } from "../types";
+import type { City, Spot } from "../types";
+import { SpotForm } from "./SpotForm";
 
 /** Grouped by category, because that is how you'd ask for one. */
-export function SpotList({ city }: { city: CityId }) {
-  const { forCity, remove } = useSpots();
-  const spots = forCity(city);
+export function SpotList({ city }: { city: City }) {
+  const { forCity } = useSpots();
+  const [editing, setEditing] = useState<Spot | null>(null);
+  const spots = forCity(city.id);
 
   if (spots.length === 0) {
     return <p className="empty">Nothing yet. The first one is usually where you ate.</p>;
@@ -37,12 +39,15 @@ export function SpotList({ city }: { city: CityId }) {
                         </a>
                       )}
                     </div>
+                    {/* Edit rather than delete: a spot is a sentence you wrote,
+                        and the only thing you could do to it was throw it away.
+                        Removing lives inside the form now. */}
                     <button
-                      className="ghost spot-remove"
-                      onClick={() => remove(spot.id)}
-                      aria-label={`Remove ${spot.name}`}
+                      className="ghost spot-edit"
+                      onClick={() => setEditing(spot)}
+                      aria-label={`Edit ${spot.name}`}
                     >
-                      ✕
+                      ✎
                     </button>
                   </li>
                 ))}
@@ -53,6 +58,8 @@ export function SpotList({ city }: { city: CityId }) {
       </div>
 
       <SpotPhotoCredits spots={spots} />
+
+      {editing && <SpotForm city={city} spot={editing} onClose={() => setEditing(null)} />}
     </>
   );
 }

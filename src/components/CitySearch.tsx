@@ -5,6 +5,7 @@ import { CITIES } from "../data/cities";
 import { ratingOf } from "../lib/ranking";
 import { inlineCompletion, searchCities } from "../lib/search";
 import { useLog } from "../state/LogContext";
+import { CityPhoto } from "./CityPhoto";
 import { Modal } from "./Modal";
 import { Stars } from "./Stars";
 
@@ -89,7 +90,7 @@ export function CitySearch({ onClose }: { onClose: () => void }) {
                 onMouseEnter={() => setActive(index)}
                 onClick={() => open(city.id)}
               >
-                <img src={city.photo} alt="" />
+                <CityPhoto city={city} />
                 <span>
                   <b>{city.name}</b>
                   <small>{city.country}</small>

@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import type { City } from "../types";
 import { ArrivalStamp } from "./ArrivalStamp";
+import { CityPhoto } from "./CityPhoto";
 import { Stars } from "./Stars";
 
 interface StampProps {
@@ -21,7 +22,7 @@ export function Stamp({ city, rating, date, stars }: StampProps) {
   return (
     <div className="stamp">
       <div className="pic">
-        <img src={city.photo} alt={city.name} />
+        <CityPhoto city={city} alt={city.name} />
         {rating !== null && <ArrivalStamp city={city} date={date ?? "—"} />}
       </div>
       <div className="plate">

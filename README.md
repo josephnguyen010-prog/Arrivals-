@@ -48,7 +48,10 @@ question or two in practice. The ordering that falls out is a real ranked list, 
 
 **You rate the city, but you log the trip.** Films get watched a hundred times a year; cities get
 visited maybe three. A city-shaped log would be too quiet to be worth opening. So the unit is a
-visit, and the MyPassport screen shows them in order, with repeat trips marked `↻ visit 2`.
+visit, and the MyPassport screen shows them in order, with repeat trips marked `↻ visit 2`. It's
+ruled off by year rather than by month: at this rate of travel a month header sits over one row
+almost every time, which splits the date in two and strands the day in the margin, a long way from
+the header that gives it meaning. Years actually group, and each row carries its date whole.
 
 **Cities are a finite, canonical catalogue.** That's the property Letterboxd relies on and
 restaurant apps have to fight for. A few thousand cities from GeoNames or Wikidata and the
@@ -80,7 +83,10 @@ Logging a visit moves a city across on its own — off the board, into Cities.
 ## Spots
 
 Under every city, the things you'd actually tell someone about, filed under **Favourite restaurant**,
-**Hidden gem**, **Must-see view** or **Skip it**. Each takes an optional link and an optional photo.
+**Hidden gem**, **Must-see view** or **Skip it**. Each takes an optional link and an optional photo,
+and each can be edited afterwards — the pencil reopens the form it was written in, category
+included, so a spot can be re-filed as well as reworded. Removing lives inside that form now; the
+only thing you could previously do to a spot you'd written was throw it away.
 
 Two things worth knowing about how they're stored:
 
@@ -103,6 +109,53 @@ left without one rather than illustrated with a stand-in.
 and rare in travel apps, but it changes the tone — drop it from `SPOT_CATEGORIES` if you'd rather
 the section stayed positive.
 
+## Notes on a city
+
+The header runs in three columns: the stamp, the title block with your rating under the name, and
+the facts beside them — how the place got there, what to eat, what to see, and one thing worth knowing. That
+third column is where the title block was leaving the page empty, which for a city you haven't been
+to is nearly all of it.
+
+They stay subordinate by type rather than by position: mono labels, muted body, ruled off, against a
+name set in 36pt. A spell as a band under the whole header tested the other theory and proved it the
+wrong way round — it read fine, and left the column it came out of empty again.
+
+The facts are a hand-written table in `data/facts.ts`, keyed by the same city ids as the catalogue,
+and a test asserts every city has every field filled and no two cities share a fun fact. That's a
+coverage check, not a fact check: the entries are deliberately kept to what's firmly established and
+short enough to read in one pass. Like the catalogue itself, the real version of this comes from
+Wikidata.
+
+A separate line saying what the city was to its country — capital, former capital, second city —
+came out again: the eyebrow above it already names the country, so on half the catalogue it was
+saying Taiwan three times in three lines. The ones that said something the eyebrow doesn't went into
+the history sentence instead, where they read as history rather than as a label: Kyoto was the
+capital for a thousand years, Rio until Brasília, Istanbul's is Ankara now, and Parliament still
+sits in Cape Town. The plain state capitals were left out — *Capital of Colorado* is true and inert,
+and if the state matters the fix is a state in the catalogue, not a clause in the prose.
+
+A column of names — people born in or made by the city — was there first and came out again. It
+needed a caption to be honest, because for a lot of cities the person the place is known for arrived
+rather than started there, and a caption on a list of three names is a lot of hedging for something
+nobody asked about the city. One fact that's actually surprising does more.
+
+## Your own photo
+
+Every city ships with a Commons photograph, and every one of them can be replaced from **Change
+photo** on the city page. Yours then shows everywhere that city appears — the card, the stamp, the
+passport row, the comparison screen — because it all resolves through one `CityPhoto` component
+rather than reading `city.photo` directly.
+
+Two details that matter more than the feature does:
+
+- **The credit changes with the photo.** CC BY obliges the credit to reach whoever is looking at the
+  picture. Once the picture is yours there's nobody to credit, and still naming the original
+  photographer would be worse than saying nothing — so the line becomes *Your photo*, and comes back
+  when you put the default back.
+- **It reuses the spot-photo pipeline exactly.** Same 900px cap, same JPEG re-encode, same up-front
+  budget check, now shared out of `lib/images.ts` and `lib/quota.ts` rather than living inside
+  `lib/spots.ts`. A full set of 44 replacements sits inside the budget.
+
 ## Layout
 
 ```
@@ -111,9 +164,13 @@ src/
   lib/storage.ts        the only file that knows where the log lives
   lib/lists.ts          list persistence
   lib/search.ts         typeahead ranking and inline completion, pure and tested
-  lib/spots.ts          spot storage, link validation, photo downscaling
-  state/                LogContext, ListsContext, SpotsContext and ProfileContext
-  data/                 city catalogue, photo credits, seed data
+  lib/dates.ts          calendar arithmetic, pure and tested
+  lib/spots.ts          spot storage and link validation
+  lib/photos.ts         per-city photo overrides
+  lib/images.ts         downscaling, shared by spots, cities and avatars
+  lib/quota.ts          the localStorage budget, and the error the forms report
+  state/                LogContext, ListsContext, SpotsContext, PhotosContext, ProfileContext
+  data/                 city catalogue, city facts, photo credits, seed data
   components/           Stars, CityCard, Stamp, ArrivalStamp, the flows
   screens/              Profile, Activity, Cities, Departures, Passport, Lists, ListPage, CityPage
   styles/tokens.css     the palette, both themes
@@ -128,7 +185,7 @@ against itself.
 
 Airmail. Red and blue together as a barber stripe rather than a single accent colour, on kraft
 paper or navy ink. Palatino for the wordmark, Helvetica for the interface, and Courier for
-anything that's data — dates, country codes, ratings — which is the vernacular of customs forms
+anything that's data — dates, countries, ratings — which is the vernacular of customs forms
 and luggage tags. Both themes are first-class; the toggle in the top bar overrides the OS setting.
 
 The perforated stamp is the one loud element, so it's kept to the city page and the moment a visit
@@ -145,25 +202,77 @@ rather than a rename.
 ## State of it
 
 Working: rating, the comparison flow, the ranking, filters and sorts, Departures, spots with links
-and photos, the MyPassport screen, per-city pages, lists you can create and reorder, both themes,
-and persistence to `localStorage`.
+and photos, city notes, replacing a city's photo with your own, the MyPassport screen, per-city
+pages, lists you can create and reorder, both themes, and persistence to `localStorage`.
+
+The sheet has no scroller of its own. A tall panel used to grow a bar down its own edge, inside the
+sheet and beside the content; the veil scrolls the whole sheet instead, and its own bar is hidden.
+
+The search shows nothing until you type. An untouched field used to open onto all 44 cities in
+alphabetical order, which is a list nobody reads — and it left the first one highlighted, so Enter
+logged a trip to Amsterdam you hadn't chosen. The sheet is pinned near the top of the veil rather
+than centred, so growing as you type moves only its bottom edge.
+
+Logging is two screens, not four: find the city, then say everything about the trip on one panel —
+when you went, how it was, a note, and one spot worth remembering. Only the city is required. The
+comparisons that follow are the app placing the rating, not another question about the visit.
+
+The date is a field you open rather than a screen you pass through. Behind it is a calendar built
+here rather than an `<input type="date">`, which brings the OS's own styling with it — the one
+element on the page that can never be made to match. `‹ ›` steps a month, `«  »` a year, future days
+are disabled, and the grid takes one tab stop with arrow keys inside it, because tabbing past
+thirty-one days to reach the one you want is not a date picker. `lib/dates.ts` holds the arithmetic —
+the month-step clamp that stops *Previous* from landing you forwards, and the leap-year cases — and
+it's tested.
+
+A typed date field above the calendar was tried and taken out again: it parsed a good spread of
+formats and had to refuse `8/12` as ambiguous, which is a lot of apparatus in front of a control
+that was already two clicks.
+
+**Your review** sits directly under the city header, with **what people say** beneath it. Both are
+about the place rather than about a trip, which is the same split the app makes with the rating: a
+visit's note is what one trip was like, a review is what you make of the city. Writing one is a
+sheet with a single field; it can be edited or deleted from the same place afterwards. It lives on
+the log as `reviews`, keyed by city, and older saves without the field load with an empty one.
+
+The **Activity** screen is a feed of what happened rather than a second copy of what was said: one
+scannable row an entry — who, where, when, what they gave it — linking to the city page where the
+review itself lives. It carried the full text before, which meant nineteen reviews stacked up on one
+screen and every one of them printed twice in the app.
+
+**What people say** sits under your review, above your own spots: it is about the place
+rather than about your trip. The heading carries the average of the ratings beside it. The friends
+and their notes are invented, and there are enough of them now that most cities have one — a section
+that says *nobody you follow has been* on forty of forty-four cities is a feature you can't see.
+
+Your note is the one thing the app used to give everyone but you. The feed's invented friends had
+reviews from the start; your own log held a rating, some dates and a few spots, and nowhere to say
+what a place was actually like. It shows on the city page beside each visit and under the city's
+name in the passport.
+
+Nothing in the log flow is thrown away once a rating is picked. The comparisons only decide where a
+city sits inside its rating, so leaving them — Escape, the veil, **Skip the rest** — keeps the visit
+and files it by the answers given so far, placed mid-bracket rather than at the top of the rating,
+which is the least the answers claim. `settleEarly` in `ranking.ts` is that rule, and it's tested.
 
 Not built yet:
 
 - **Accounts and a real social graph.** The feed and the friends' notes are invented. Swapping
   `lib/storage.ts` for a Supabase table is the whole migration for the log itself; the social half
   is a real build.
-- **A real date picker.** Step 2 offers recent months and invents a day of the month.
 - **More than 44 cities.** The catalogue is still a hand-written array; the real one is GeoNames.
+  The facts table in `data/facts.ts` is hand-written against the same ids and has the same problem.
 - **Sharing a list.** Lists exist and are editable, but only in your own browser. Making one
   shareable is the point of them and needs the backend.
-- **Your own photo per visit.** Spots take photos now; visits still don't.
+- **Your own photo per visit.** Spots and cities take photos now; a single visit still doesn't, so
+  ten years of trips to one city share one picture.
 
 ## Photos
 
-All 44 city photographs and the 16 spot photographs are CC0, public domain or attribution-only, and
-the credit renders on the city page because CC BY requires it to reach whoever is looking at the
-photo. Share-alike is deliberately excluded: it obliges derivative works to carry the same licence,
+All 44 default city photographs and the 16 spot photographs are CC0, public domain or
+attribution-only, and the credit renders on the city page because CC BY requires it to reach
+whoever is looking at the photo — until the photo is replaced with one of your own, at which point
+there is nobody to credit and the line says so. Share-alike is deliberately excluded: it obliges derivative works to carry the same licence,
 which is a problem once photos sit inside a product. [CREDITS.md](CREDITS.md) has both tables and
 the rule for adding a city.
 

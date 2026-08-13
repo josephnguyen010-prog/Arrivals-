@@ -7,6 +7,7 @@ import { HashRouter } from "react-router-dom";
 import { App } from "./App";
 import { ListsProvider } from "./state/ListsContext";
 import { LogProvider } from "./state/LogContext";
+import { PhotosProvider } from "./state/PhotosContext";
 import { ProfileProvider } from "./state/ProfileContext";
 import { SpotsProvider } from "./state/SpotsContext";
 import "./styles/global.css";
@@ -21,7 +22,11 @@ createRoot(container).render(
         <LogProvider>
           <ListsProvider>
             <SpotsProvider>
-              <App />
+              {/* Innermost: every screen reads photos, nothing here writes to
+                  the others, so it can sit closest to what renders. */}
+              <PhotosProvider>
+                <App />
+              </PhotosProvider>
             </SpotsProvider>
           </ListsProvider>
         </LogProvider>
