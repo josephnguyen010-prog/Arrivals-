@@ -40,9 +40,12 @@ export function ProfileHeader() {
       </div>
 
       <div className="pstats">
+        {/* "Cities 9 · Visits 13" read as two counts of the same thing. They
+            are a place and an occasion, so the second label says which of the
+            two it counts, and the year says what it is a year of. */}
         <Stat value={ratedCount(log)} label="Cities" />
-        <Stat value={log.visits.length} label="Visits" />
-        <Stat value={countriesThisYear.size} label={`Countries ${year}`} />
+        <Stat value={log.visits.length} label="Visits to them" />
+        <Stat value={countriesThisYear.size} label="Countries this year" />
         <Stat value={log.wishlist.length} label="Departures" />
         <Stat value={LISTS.length} label="Lists" />
       </div>

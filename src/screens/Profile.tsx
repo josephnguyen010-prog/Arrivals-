@@ -4,6 +4,7 @@ import { CityCard } from "../components/CityCard";
 import { CityPhoto } from "../components/CityPhoto";
 import { FavouritesPicker } from "../components/FavouritesPicker";
 import { RateCity } from "../components/RateCity";
+import { Countries, countryCount, countryTotal } from "../components/Countries";
 import { cityById, requireCity } from "../data/cities";
 import { ratingOf, visitOrdinals } from "../lib/ranking";
 import { useLog } from "../state/LogContext";
@@ -96,23 +97,16 @@ export function Profile() {
           </Link>
         )}
 
+        {/* Where the five most recent visits used to be listed. They were the
+            same five names the passport and the activity feed already carry;
+            which countries they add up to is on no other screen. */}
         <div className="side-head" style={{ marginTop: "28px" }}>
-          <h2 style={{ border: "none", margin: 0, padding: 0 }}>
-            <Link to="/passport">MyPassport</Link>
-          </h2>
-          <span className="side-count">{log.visits.length}</span>
+          <h2 style={{ border: "none", margin: 0, padding: 0 }}>Countries</h2>
+          <span className="side-count">
+            {countryCount(log)}/{countryTotal(log)}
+          </span>
         </div>
-        <ul className="side-list">
-          {log.visits.slice(0, 5).map((visit) => {
-            const city = requireCity(visit.city);
-            return (
-              <li key={visit.id}>
-                <Link to={`/city/${city.id}`}>{city.name}</Link>
-                <RateCity city={city} size={13} />
-              </li>
-            );
-          })}
-        </ul>
+        <Countries />
       </aside>
 
       {picking && <FavouritesPicker onClose={() => setPicking(false)} />}

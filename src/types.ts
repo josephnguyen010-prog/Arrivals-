@@ -1,10 +1,13 @@
 export type CityId = string;
 
+/** The five the board filters by, and the five a passport fills up. */
+export type Region = "Asia" | "Europe" | "Americas" | "Africa" | "Oceania";
+
 export interface City {
   id: CityId;
   name: string;
   country: string;
-  region: "Asia" | "Europe" | "Americas" | "Africa" | "Oceania";
+  region: Region;
   photo: string;
 }
 

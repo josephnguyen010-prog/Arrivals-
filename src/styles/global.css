@@ -57,11 +57,17 @@ img {
 .wrap {
   max-width: 1180px;
   margin: 0 auto;
-  padding: 0 28px 90px;
+  /* Enough to clear the bar and no more. The tab strip used to bring its own
+     28px of margin down here; when it moved into the bar that margin stayed
+     behind as a band of nothing. */
+  padding: 26px 28px 90px;
 }
 
+/* No top padding of its own: it used to clear the tab strip that sat above it
+   in the page, and with the strip gone that padding stacked on the wrap's and
+   held the first heading a long way off the bar. */
 .screen {
-  padding-top: 26px;
+  padding-top: 0;
 }
 
 h2 {
@@ -129,10 +135,11 @@ h2 {
   max-width: 1180px;
   margin: 0 auto;
   padding: 0 28px;
-  height: 62px;
+  min-height: 64px;
   display: flex;
   align-items: center;
-  gap: 30px;
+  gap: 22px;
+  flex-wrap: wrap;
 }
 
 .wordmark {
@@ -159,23 +166,19 @@ h2 {
   color: var(--muted);
 }
 
-/* The section tabs sit under the profile block, not in the app bar — they
-   describe one account, so they belong with the name and the stats. */
-/* The first thing in the page on every tab, and at the same height on every
-   tab — it is the row you navigate with, so it must not move when you use it. */
+/* In the bar rather than in the page, and unboxed: a bordered strip floating
+   below the bar read as a widget the page owned. Centred between the wordmark
+   and the actions by a flexible spacer either side. */
 .navtabs {
   display: flex;
-  gap: 2px;
+  gap: 6px;
   flex-wrap: wrap;
-  border: 1px solid var(--rule);
-  border-radius: 3px;
-  background: var(--surface);
-  padding: 4px 6px;
-  margin: 28px 0 26px;
+  justify-content: center;
+  flex: none;
 }
 
 .navtabs a {
-  padding: 8px 14px;
+  padding: 5px 12px;
   color: var(--muted);
   font-size: 14px;
   position: relative;
@@ -190,14 +193,36 @@ h2 {
   color: var(--ink);
 }
 
+/* Under the word itself. The tabs are centred in the bar's height now, so a
+   rule at the bar's bottom edge would be floating well below them. */
 .navtabs a[aria-current="page"]::after {
   content: "";
   position: absolute;
-  left: 14px;
-  right: 14px;
-  bottom: 2px;
+  left: 12px;
+  right: 12px;
+  bottom: 0;
   height: 2px;
   background: var(--accent);
+}
+
+/* Where the three groups stop fitting on one line, the sections take their own
+   and the flexible spacers collapse, so they start at the wordmark's edge
+   rather than drifting to the middle of an empty row. */
+@media (max-width: 900px) {
+  .topbar-in .spacer {
+    display: none;
+  }
+
+  .navtabs {
+    order: 4;
+    flex-basis: 100%;
+    justify-content: flex-start;
+    margin: 0 0 10px -12px;
+  }
+
+  .wordmark {
+    margin-right: auto;
+  }
 }
 
 .topbar-in .spacer {
@@ -233,13 +258,13 @@ h2 {
 
 /* ---------------------------------------------------------- profile --- */
 
-/* Under the tab strip now, so it takes the rule: nothing below it separates it
-   from the favourites, and the strip above it already has its own edge. */
+/* Under the masthead now, so it takes the rule: nothing below it separates it
+   from the favourites, and the bar above it already has its own edge. */
 .profile {
   display: flex;
   align-items: center;
   gap: 20px;
-  padding: 2px 0 22px;
+  padding: 0 0 22px;
   margin-bottom: 26px;
   border-bottom: 1px solid var(--rule);
   flex-wrap: wrap;
@@ -276,9 +301,27 @@ h2 {
 
 .pstats {
   display: flex;
-  gap: 30px;
+  gap: 26px;
   margin-left: auto;
   flex-wrap: wrap;
+  align-items: baseline;
+}
+
+/* Centred on its label, not right-aligned against it. Right-aligned, a one- or
+   two-digit number sat at the far end of a label that might be six characters
+   or nineteen, so the row of figures zigzagged and each number looked adrift of
+   the words under it. Centred, every pair is its own small block whatever the
+   label's length. */
+.pstats .pstat {
+  text-align: center;
+}
+
+/* A hairline between the pairs, so five blocks of two different widths read as
+   a row of stats rather than as text that happens to be spaced out. Scoped to
+   this strip: the city page reuses the block on its own row of four. */
+.pstats .pstat + .pstat {
+  border-left: 1px solid var(--rule);
+  padding-left: 26px;
 }
 
 .pstat {
@@ -425,6 +468,146 @@ h2 {
 .pstat > .stars {
   display: block;
   margin-bottom: 2px;
+}
+
+/* -------------------------------------------------------- countries --- */
+/* How much of each continent the passport covers, and the list behind it. */
+
+.regions {
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 0;
+}
+
+.regions a {
+  display: grid;
+  grid-template-columns: 78px minmax(0, 1fr) 42px;
+  align-items: center;
+  gap: 12px;
+  padding: 9px 6px;
+  margin: 0 -6px;
+  border-radius: 2px;
+}
+
+.regions a:hover {
+  background: var(--surface);
+}
+
+.rgname {
+  font-size: 13.5px;
+}
+
+/* A track that fills rather than a bar that grows. The ratio is against a
+   fixed limit, so the part still empty is half of what the row is saying. */
+.rgtrack {
+  height: 4px;
+  border-radius: 2px;
+  background: var(--surface-2);
+  overflow: hidden;
+}
+
+.rgfill {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+  border-radius: 2px;
+}
+
+.rgcount {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* The limit is context, not a second number to read. */
+.rgcount i {
+  font-style: normal;
+  color: var(--muted);
+}
+
+/* The other four continents, along the top of one continent's list. */
+.rgtabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 26px;
+}
+
+.rgtabs a {
+  padding: 6px 12px;
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.rgtabs a i {
+  font-style: normal;
+  font-family: var(--mono);
+  font-size: 10.5px;
+}
+
+.rgtabs a:hover {
+  color: var(--ink);
+}
+
+.rgtabs a.on {
+  color: var(--ink);
+  border-color: var(--ink);
+}
+
+.checklist {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.checklist li {
+  display: grid;
+  grid-template-columns: 26px minmax(0, 200px) minmax(0, 1fr);
+  align-items: baseline;
+  gap: 14px;
+  padding: 11px 0;
+  border-bottom: 1px solid var(--rule);
+}
+
+/* An empty box would be five columns of nothing down the page; the absence of
+   a tick is legible on its own once the reached rows carry one. */
+.ctick {
+  font-size: 14px;
+  color: var(--accent);
+  text-align: center;
+}
+
+.cname {
+  font-family: var(--display);
+  font-size: 18px;
+  color: var(--muted);
+}
+
+.checklist li.done .cname {
+  color: var(--ink);
+}
+
+.ccities {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.ccities a:hover {
+  color: var(--accent);
+}
+
+/* The city you have actually logged, inside a country that may have several. */
+.ccities a.cbeen {
+  color: var(--ink);
+  text-decoration: underline;
+  text-decoration-color: var(--accent);
+  text-underline-offset: 3px;
 }
 
 /* ------------------------------------------------------------ stars --- */

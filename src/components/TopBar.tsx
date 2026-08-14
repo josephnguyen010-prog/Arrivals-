@@ -2,12 +2,24 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useTheme } from "../lib/useTheme";
 import { CitySearch } from "./CitySearch";
+import { NavTabs } from "./NavTabs";
 
 interface TopBarProps {
   onLogVisit: () => void;
 }
 
-/** The app's own bar: wordmark and the things you can do from anywhere. */
+/**
+ * The app's own bar: the wordmark, the sections, and the things you can do from
+ * anywhere — one line, with the sections centred in the space between the two.
+ *
+ * The sections belong here rather than in the page: once the profile block
+ * stopped sitting above them they were no longer one person's shelves under
+ * their name, they were the app's navigation. Centred rather than tucked in
+ * beside the wordmark, they read as their own group instead of as a tail on the
+ * title, which is what lets them share a line with the one red button without
+ * either losing. It holds to about 830px, where they drop to a line of their
+ * own rather than squash.
+ */
 export function TopBar({ onLogVisit }: TopBarProps) {
   const { theme, toggle } = useTheme();
   const [searching, setSearching] = useState(false);
@@ -21,6 +33,10 @@ export function TopBar({ onLogVisit }: TopBarProps) {
             <b>Arrivals</b>
             <span>Cities, logged</span>
           </Link>
+
+          <span className="spacer" />
+
+          <NavTabs />
 
           <span className="spacer" />
 

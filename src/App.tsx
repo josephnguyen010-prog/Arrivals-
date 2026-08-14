@@ -1,13 +1,13 @@
 import { useState } from "react";
 import { Route, Routes, useLocation } from "react-router-dom";
 import { LogVisitFlow } from "./components/LogVisitFlow";
-import { NavTabs } from "./components/NavTabs";
 import { ProfileHeader } from "./components/ProfileHeader";
 import { TopBar } from "./components/TopBar";
 import { Activity } from "./screens/Activity";
 import { Cities } from "./screens/Cities";
 import { CityPage } from "./screens/CityPage";
 import { Departures } from "./screens/Departures";
+import { CountryList } from "./screens/CountryList";
 import { FriendVisit } from "./screens/FriendVisit";
 import { ListPage } from "./screens/ListPage";
 import { Lists } from "./screens/Lists";
@@ -31,7 +31,6 @@ export function App() {
       <TopBar onLogVisit={() => setLogging(true)} />
 
       <div className="wrap">
-        <NavTabs />
         {onProfile && <ProfileHeader />}
 
         <Routes>
@@ -39,6 +38,7 @@ export function App() {
           <Route path="/activity" element={<Activity />} />
           {/* A feed entry, not a city: what one person said about it. */}
           <Route path="/activity/:id" element={<FriendVisit />} />
+          <Route path="/countries/:region" element={<CountryList />} />
           <Route path="/cities" element={<Cities />} />
           <Route path="/departures" element={<Departures />} />
           <Route path="/passport" element={<Passport />} />
