@@ -58,6 +58,9 @@ export function App() {
           page and in CREDITS.md. Friends and their notes are invented. <b>Arrivals</b> is a working
           title.
         </p>
+        <p className="byline">
+          By <b>Joseph Nguyen</b>
+        </p>
       </div>
 
       {logging && <LogVisitFlow onClose={() => setLogging(false)} />}
