@@ -58,20 +58,18 @@ export function EditProfile({ onClose }: { onClose: () => void }) {
 
       <label className="field">
         <span>Handle</span>
-        <div className="handle-field">
-          <span className="at">@</span>
-          <input
-            className="search"
-            value={handle}
-            onChange={(event) => setHandle(event.target.value.replace(/\s+/g, ""))}
-          />
-        </div>
+        <input
+          className="search"
+          value={handle}
+          onChange={(event) => setHandle(event.target.value.replace(/\s+/g, ""))}
+        />
       </label>
 
       <label className="field">
         <span>Bio</span>
-        <input
-          className="search"
+        <textarea
+          className="search note-box"
+          rows={3}
           value={bio}
           placeholder="Ninety countries behind, three ahead"
           onChange={(event) => setBio(event.target.value)}

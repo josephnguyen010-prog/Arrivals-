@@ -121,6 +121,21 @@ h2 {
   padding-top: 0;
 }
 
+/* Sits under the footnotes as a signature rather than another one of them:
+   letterspaced small caps, no rule, and the last thing on every page. */
+.byline {
+  margin: 20px 0 0;
+  color: var(--muted);
+  font-size: 11.5px;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.byline b {
+  color: var(--ink);
+  font-weight: 600;
+}
+
 /* -------------------------------------------------------------- bar ---- */
 
 .topbar {
@@ -400,21 +415,6 @@ h2 {
   align-items: center;
   gap: 10px;
   flex-wrap: wrap;
-}
-
-.handle-field {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.handle-field .at {
-  font-family: var(--mono);
-  color: var(--muted);
-}
-
-.handle-field .search {
-  margin-bottom: 0;
 }
 
 /* -------------------------------------------------------- edit city --- */
